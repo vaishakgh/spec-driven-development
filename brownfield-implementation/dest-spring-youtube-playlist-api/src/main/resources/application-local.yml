@@ -1,0 +1,7 @@
+# Local dev profile — overrides base application.yml
+# youtube.api.base-url and max-results inherited from application.yml
+# YOUTUBE_API_KEY must be set in your local environment (or .env file — do NOT commit)
+youtube:
+  api:
+    base-url: https://www.googleapis.com/youtube/v3
+    max-results: 25

@@ -1,6 +1,10 @@
+---
+baseline_commit: d39500e7c2b6be612c060ad33070eb0f26c9a323
+---
+
 # Story 1.1: Initialise Spring Boot Project Scaffold
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -22,36 +26,36 @@ so that I have a working foundation to build the two API endpoints on.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Bootstrap Maven project with Spring Initializr (AC: 1, 2)
-  - [ ] Run the `spring init` command exactly as specified in Dev Notes
-  - [ ] Verify the generated `pom.xml` has `spring-boot-starter-parent` 4.1.0
+- [x] Task 1 — Bootstrap Maven project with Spring Initializr (AC: 1, 2)
+  - [x] Run the `spring init` command exactly as specified in Dev Notes
+  - [x] Verify the generated `pom.xml` has `spring-boot-starter-parent` 4.1.0
 
-- [ ] Task 2 — Add manual dependencies to `pom.xml` (AC: 2)
-  - [ ] Add `springdoc-openapi-starter-webmvc-ui:3.0.3` (runtime scope)
-  - [ ] Add `logstash-logback-encoder` latest stable (runtime scope) — enables JSON logging in Epic 5
-  - [ ] Add `wiremock-standalone` latest stable (test scope) — enables WireMock in Epic 6
-  - [ ] Add `openapi-generator-maven-plugin` latest stable compatible with Spring Boot 4.x — configure plugin in Story 1.2, declare dep here
-  - [ ] Confirm `pom.xml` compiles: `mvn compile`
+- [x] Task 2 — Add manual dependencies to `pom.xml` (AC: 2)
+  - [x] Add `springdoc-openapi-starter-webmvc-ui:3.0.3` (runtime scope)
+  - [x] Add `logstash-logback-encoder` latest stable (runtime scope) — enables JSON logging in Epic 5
+  - [x] Add `wiremock-standalone` latest stable (test scope) — enables WireMock in Epic 6
+  - [x] Add `openapi-generator-maven-plugin` latest stable compatible with Spring Boot 4.x — configure plugin in Story 1.2, declare dep here
+  - [x] Confirm `pom.xml` compiles: `mvn compile`
 
-- [ ] Task 3 — Configure `application.yml` (AC: 1)
-  - [ ] Set `server.port: 8081`
-  - [ ] Enable virtual threads: `spring.threads.virtual.enabled: true`
-  - [ ] Configure Actuator health probes (liveness + readiness exposure)
-  - [ ] Set base logging level INFO
+- [x] Task 3 — Configure `application.yml` (AC: 1)
+  - [x] Set `server.port: 8081`
+  - [x] Enable virtual threads: `spring.threads.virtual.enabled: true`
+  - [x] Configure Actuator health probes (liveness + readiness exposure)
+  - [x] Set base logging level INFO
 
-- [ ] Task 4 — Create `application-local.yml` (AC: 1, 3)
-  - [ ] Add `youtube.api.base-url: https://www.googleapis.com/youtube/v3`
-  - [ ] Add `youtube.api.max-results: 25`
+- [x] Task 4 — Create `application-local.yml` (AC: 1, 3)
+  - [x] Add `youtube.api.base-url: https://www.googleapis.com/youtube/v3`
+  - [x] Add `youtube.api.max-results: 25`
 
-- [ ] Task 5 — Create `WebClientConfig.java` (AC: 3, 4)
-  - [ ] Read `${youtube.api.base-url}` via `@Value`
-  - [ ] Expose a `WebClient` `@Bean` with that base URL
-  - [ ] **Do NOT wire `${youtube.api.key}` here** — key injection is Story 1.3; service layer wires it as a query param in Stories 2 and 3
+- [x] Task 5 — Create `WebClientConfig.java` (AC: 3, 4)
+  - [x] Read `${youtube.api.base-url}` via `@Value`
+  - [x] Expose a `WebClient` `@Bean` with that base URL
+  - [x] **Do NOT wire `${youtube.api.key}` here** — key injection is Story 1.3; service layer wires it as a query param in Stories 2 and 3
 
-- [ ] Task 6 — Verify startup (AC: 1)
-  - [ ] `mvn spring-boot:run -Dspring-boot.run.profiles=local` starts with no errors on port 8081
-  - [ ] `mvn compile` succeeds with no errors
-  - [ ] Grep all `src/` and `*.yml`/`*.yaml` files — confirm no hardcoded API key value
+- [x] Task 6 — Verify startup (AC: 1)
+  - [x] `mvn spring-boot:run -Dspring-boot.run.profiles=local` starts with no errors on port 8081
+  - [x] `mvn compile` succeeds with no errors
+  - [x] Grep all `src/` and `*.yml`/`*.yaml` files — confirm no hardcoded API key value
 
 ## Dev Notes
 
@@ -264,9 +268,35 @@ youtube-playlist-api/
 ### Agent Model Used
 
 claude-sonnet-4-6 (bmad-create-story 2026-06-20)
+claude-sonnet-4-6 (bmad-dev-story 2026-06-20)
 
 ### Debug Log References
 
+- `spring` CLI not available on machine → created all project files manually (equivalent to `spring init` output)
+- Only Java 8 (temurin-8) installed → downloaded Temurin 21.0.5 tar.gz from Adoptium to `~/java/jdk-21.0.5+11/`; downloaded Maven 3.9.9 binary to `~/java/apache-maven-3.9.9/`; no sudo required
+- Homebrew `openjdk@21` formula needs Xcode.app (only formula, not cask) → used Adoptium tar.gz instead
+- `brew install --cask temurin@21` requires interactive sudo for pkg installer → used tar.gz extraction approach
+- `mvn compile` BUILD SUCCESS on first attempt; 2 source files compiled with javac [debug parameters release 21]
+- `mvn spring-boot:run -Dspring-boot.run.profiles=local` with `YOUTUBE_API_KEY=test-key-for-startup-check` started on port 8081 in 5.029s — no errors
+- SpringDoc WARN messages at startup are expected (prod profile disables these in Story 1.3)
+- Secret scan: `grep -r "AIza" src/` → nothing; `grep -r "youtube.api.key = [^$]" src/` → nothing ✓
+
 ### Completion Notes List
 
+- Created project as `dest-spring-youtube-playlist-api/` (user-specified directory name, not `youtube-playlist-api/`)
+- All 4 ACs verified: port 8081 ✓, pom.xml Spring Boot 4.1.0 + correct deps ✓, WebClient bean with `${youtube.api.base-url}` ✓, no hardcoded API key ✓
+- pom.xml versions used: springdoc 3.0.3 (mandated), logstash-logback-encoder 8.0, wiremock-standalone 3.10.0, openapi-generator-maven-plugin 7.10.0 (plugin declared only — config in Story 1.2)
+- `springdoc-openapi-starter-webmvc-ui:3.0.3` added as compile scope (not runtime) — springdoc requires compile-time annotation processing
+- Java 21 + Maven 3.9.9 available at `~/java/` for subsequent stories; set JAVA_HOME + PATH before running mvn
+
 ### File List
+
+- `dest-spring-youtube-playlist-api/pom.xml` (NEW)
+- `dest-spring-youtube-playlist-api/mvnw` (NEW)
+- `dest-spring-youtube-playlist-api/mvnw.cmd` (NEW)
+- `dest-spring-youtube-playlist-api/.mvn/wrapper/maven-wrapper.properties` (NEW)
+- `dest-spring-youtube-playlist-api/.gitignore` (NEW)
+- `dest-spring-youtube-playlist-api/src/main/resources/application.yml` (NEW)
+- `dest-spring-youtube-playlist-api/src/main/resources/application-local.yml` (NEW)
+- `dest-spring-youtube-playlist-api/src/main/java/com/example/youtubeplaylistapi/YoutubePlaylistApiApplication.java` (NEW)
+- `dest-spring-youtube-playlist-api/src/main/java/com/example/youtubeplaylistapi/config/WebClientConfig.java` (NEW)

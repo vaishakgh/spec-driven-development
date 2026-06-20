@@ -1,0 +1,11 @@
+# Production environment profile
+# Deployed via Kubernetes; YOUTUBE_API_KEY injected from K8s Secret
+youtube:
+  api:
+    max-results: 50
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

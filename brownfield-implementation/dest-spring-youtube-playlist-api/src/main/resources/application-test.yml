@@ -1,0 +1,8 @@
+# Test profile — used by @SpringBootTest with profiles={"test"}
+# Overrides YOUTUBE_API_KEY requirement with static placeholder
+# base-url points to WireMock (Story 6.1 finalises port and stub setup)
+youtube:
+  api:
+    base-url: http://localhost:8089
+    key: test-api-key-placeholder
+    max-results: 25

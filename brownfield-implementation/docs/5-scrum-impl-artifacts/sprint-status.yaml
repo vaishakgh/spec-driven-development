@@ -1,5 +1,5 @@
 # generated: 2026-06-20
-# last_updated: 2026-06-20
+# last_updated: 2026-06-21
 # project: brownfield-implementation
 # project_key: NOKEY
 # tracking_system: file-system
@@ -36,7 +36,7 @@
 # - Recommended sprint order per architecture: Epic 1 → Epic 4 → Epics 2 & 3 (parallel) → Epic 5 → Epic 6 → Epic 7
 
 generated: 2026-06-20
-last_updated: 2026-06-20
+last_updated: 2026-06-21
 project: brownfield-implementation
 project_key: NOKEY
 tracking_system: file-system
@@ -45,9 +45,9 @@ story_location: docs/5-scrum-impl-artifacts
 development_status:
   # ── Epic 1: Project Foundation & API Contract ──────────────────────────────
   epic-1: in-progress
-  1-1-initialise-spring-boot-project-scaffold: ready-for-dev
-  1-2-convert-raml-1-0-spec-to-oas-3-0-and-generate-controller-stubs: backlog
-  1-3-configure-multi-environment-profiles-and-api-key-injection: backlog
+  1-1-initialise-spring-boot-project-scaffold: done
+  1-2-convert-raml-1-0-spec-to-oas-3-0-and-generate-controller-stubs: done
+  1-3-configure-multi-environment-profiles-and-api-key-injection: done
   epic-1-retrospective: optional
 
   # ── Epic 4: Error Handling (implement before Epics 2 & 3) ─────────────────

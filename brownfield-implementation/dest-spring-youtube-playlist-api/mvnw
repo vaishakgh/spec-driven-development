@@ -1,0 +1,81 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# Apache Maven Wrapper startup batch script, version 3.3.2
+# ----------------------------------------------------------------------------
+
+# If specified, validates the Maven version.
+if [ -n "$MVNW_REPOURL" ] ; then
+  distributionUrl="$MVNW_REPOURL/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip"
+fi
+
+# OS specific support.
+darwin=false
+case "$(uname)" in
+  Darwin*) darwin=true;;
+esac
+
+# Find the project base directory.
+MAVEN_PROJECTBASEDIR="${MAVEN_BASEDIR:-}"
+if [ -z "$MAVEN_PROJECTBASEDIR" ]; then
+  MAVEN_PROJECTBASEDIR="$(pwd)"
+  while [ ! -f "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.properties" ]; do
+    parent="$(dirname "$MAVEN_PROJECTBASEDIR")"
+    if [ "$parent" = "$MAVEN_PROJECTBASEDIR" ]; then
+      break
+    fi
+    MAVEN_PROJECTBASEDIR="$parent"
+  done
+fi
+export MAVEN_PROJECTBASEDIR
+
+wrapperJarFile="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar"
+wrapperUrl=$(grep wrapperUrl "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.properties" 2>/dev/null | sed 's/wrapperUrl=//')
+distributionUrl=$(grep distributionUrl "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.properties" 2>/dev/null | sed 's/distributionUrl=//')
+
+MAVEN_USER_HOME="${MAVEN_USER_HOME:-$HOME/.m2}"
+MAVEN_WRAPPER_HOME="${MAVEN_USER_HOME}/wrapper/dists"
+
+distributionUrlName="${distributionUrl##*/}"
+distributionUrlNameMain="${distributionUrlName%.*}"
+DISTRIBUTION_ID="${distributionUrlNameMain%-bin}"
+
+WRAPPER_DIR="$MAVEN_WRAPPER_HOME/$DISTRIBUTION_ID"
+DISTRIBUTION_JAR="$WRAPPER_DIR/apache-maven-3.9.9/bin/mvn"
+
+if [ -f "$DISTRIBUTION_JAR" ]; then
+  exec "$DISTRIBUTION_JAR" "$@"
+fi
+
+# Download Maven wrapper jar if not present
+if [ ! -f "$wrapperJarFile" ]; then
+  if command -v curl > /dev/null 2>&1; then
+    curl -o "$wrapperJarFile" "$wrapperUrl" 2>/dev/null
+  elif command -v wget > /dev/null 2>&1; then
+    wget -O "$wrapperJarFile" "$wrapperUrl" 2>/dev/null
+  fi
+fi
+
+exec "$JAVA_HOME/bin/java" \
+  -classpath "$wrapperJarFile" \
+  "-Dmaven.multiModuleProjectDirectory=$MAVEN_PROJECTBASEDIR" \
+  org.apache.maven.wrapper.MavenWrapperMain \
+  "$@"

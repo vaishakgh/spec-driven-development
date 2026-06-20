@@ -1,0 +1,279 @@
+openapi: "3.0.3"
+info:
+  title: YouTube Playlist API
+  description: |
+    Spring Boot service proxying the YouTube Data API v3.
+    Internal API — consumers do not supply API keys.
+  version: "v1"
+
+servers:
+  - url: http://localhost:8081
+    description: Local development server
+
+paths:
+
+  /api/youtube/playlists/{playlistId}:
+    get:
+      tags:
+        - Playlist
+      summary: Get Playlist Items
+      operationId: getPlaylistItems
+      description: |
+        Fetches items from the specified YouTube playlist, paginated.
+        Use nextPageToken from the response to retrieve subsequent pages.
+      parameters:
+        - name: playlistId
+          in: path
+          required: true
+          description: Unique identifier of the YouTube playlist (e.g. PLxxxxxx)
+          schema:
+            type: string
+          example: "PLbpi6ZahtOH6Ar_3GPy3workP3aUa5QGD"
+        - name: pageToken
+          in: query
+          required: false
+          description: Cursor token for pagination. Must match the cursor format from a prior response.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved playlist items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaylistResponse"
+        "400":
+          description: Invalid or malformed pageToken parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: The YouTube API key is invalid or missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Unauthorized"
+                message: "Invalid or missing YouTube API Key."
+                code: 401
+        "503":
+          description: Could not connect to the YouTube API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Connection Error"
+                message: "Unable to connect to YouTube API."
+                code: 503
+        "500":
+          description: Unexpected internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/youtube/song/{videoId}:
+    get:
+      tags:
+        - Video
+      summary: Get Song Details by Video ID
+      operationId: getVideoDetails
+      description: |
+        Fetches detailed metadata for a single YouTube video including snippet,
+        content details (duration), and statistics (views, likes).
+        Returns HTTP 404 if the videoId does not exist — this is a breaking change
+        from the previous Mule behaviour (which returned HTTP 200 with null fields).
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          description: Unique YouTube video identifier (11-character string)
+          schema:
+            type: string
+          example: "dQw4w9WgXcQ"
+      responses:
+        "200":
+          description: Successfully retrieved video details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SongDetail"
+        "404":
+          description: The requested videoId does not correspond to any YouTube video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Not Found"
+                message: "Video not found for the given videoId."
+                code: 404
+        "401":
+          description: The YouTube API key is invalid or missing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Could not connect to the YouTube API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+
+    PlaylistItem:
+      description: A single item (song/video) within a YouTube playlist
+      type: object
+      required:
+        - position
+        - videoId
+        - title
+        - description
+        - publishedAt
+        - videoUrl
+      properties:
+        position:
+          type: integer
+          description: Zero-based position of this item in the playlist
+          example: 0
+        videoId:
+          type: string
+          description: YouTube video identifier
+          example: "dQw4w9WgXcQ"
+        title:
+          type: string
+          description: Title of the video
+          example: "Never Gonna Give You Up"
+        description:
+          type: string
+          description: Video description text
+          example: "The official music video."
+        publishedAt:
+          type: string
+          description: ISO 8601 timestamp when the video was published
+          example: "2009-10-25T06:57:33Z"
+        thumbnail:
+          type: string
+          nullable: true
+          description: URL of the medium-quality thumbnail, or null if unavailable
+          example: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg"
+        videoUrl:
+          type: string
+          description: "Full YouTube watch URL. Format: https://www.youtube.com/watch?v={videoId}"
+          example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+    PlaylistResponse:
+      description: Response returned by GET /api/youtube/playlists/{playlistId}
+      type: object
+      required:
+        - totalResults
+        - resultsPerPage
+        - playlist
+      properties:
+        totalResults:
+          type: integer
+          description: Total number of items in the playlist as reported by YouTube
+          example: 50
+        resultsPerPage:
+          type: integer
+          description: Maximum number of results returned per page
+          example: 25
+        nextPageToken:
+          type: string
+          nullable: true
+          description: Token to retrieve the next page. Null when no further pages exist.
+          example: "EAAelgEKADiD..."
+        playlist:
+          type: array
+          description: Array of playlist items for the current page
+          items:
+            $ref: "#/components/schemas/PlaylistItem"
+
+    SongDetail:
+      description: Detailed metadata for a single YouTube video
+      type: object
+      required:
+        - videoId
+        - title
+        - description
+        - channelName
+        - publishedAt
+        - duration
+        - viewCount
+        - likeCount
+        - videoUrl
+      properties:
+        videoId:
+          type: string
+          description: YouTube video identifier
+          example: "dQw4w9WgXcQ"
+        title:
+          type: string
+          description: Title of the video
+          example: "Never Gonna Give You Up"
+        description:
+          type: string
+          description: Full description of the video
+          example: "The official music video."
+        channelName:
+          type: string
+          description: Channel name (mapped from YouTube's channelTitle field)
+          example: "RickAstleyVEVO"
+        publishedAt:
+          type: string
+          description: ISO 8601 timestamp when the video was published
+          example: "2009-10-25T06:57:33Z"
+        duration:
+          type: string
+          description: "ISO 8601 duration string, e.g. PT3M33S"
+          example: "PT3M33S"
+        viewCount:
+          type: string
+          description: Total views as string (YouTube API returns string)
+          example: "1400000000"
+        likeCount:
+          type: string
+          description: Total likes as string (YouTube API returns string)
+          example: "15000000"
+        thumbnail:
+          type: string
+          nullable: true
+          description: URL of the high-quality thumbnail, or null if unavailable
+          example: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+        videoUrl:
+          type: string
+          description: "Full YouTube watch URL. Format: https://www.youtube.com/watch?v={videoId}"
+          example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+    ErrorResponse:
+      description: Standard error response returned on all error conditions
+      type: object
+      required:
+        - error
+        - message
+        - code
+      properties:
+        error:
+          type: string
+          description: Short label describing the error category
+          example: "Unauthorized"
+        message:
+          type: string
+          description: Human-readable description of what went wrong
+          example: "Invalid or missing YouTube API Key."
+        code:
+          type: integer
+          description: HTTP status code matching the response status
+          example: 401
