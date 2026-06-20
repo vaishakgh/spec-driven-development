@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core
+        http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http
+        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/core
+        http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+        http://www.mulesoft.org/schema/mule/mule-apikit
+        http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd">
+
+    <!-- ==================== CONFIGURATION ==================== -->
+
+    <configuration-properties file="properties/config-${env}.yaml" doc:name="Config Properties" />
+
+    <!-- YouTube API HTTP Request Config -->
+    <http:request-config name="YouTube_Request_Config"
+                         doc:name="YouTube HTTP Request Config"
+                         basePath="/youtube/v3">
+        <http:request-connection
+            protocol="HTTPS"
+            host="${youtube.api.baseUrl}"
+            port="443" />
+    </http:request-config>
+
+    <!-- HTTP Listener Config -->
+    <http:listener-config name="HTTP_Listener_Config"
+                          doc:name="HTTP Listener Config">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+
+    <!-- APIKit Router Config — points to the RAML spec -->
+    <apikit:config name="APIKit_Config"
+                   raml="api/youtube-playlist-api.raml"
+                   outboundHeadersMapName="outboundHeaders"
+                   httpStatusVarName="httpStatus"
+                   doc:name="APIKit Config" />
+
+
+    <!-- ==================== MAIN ENTRY FLOW ==================== -->
+    <!--
+        All HTTP traffic enters here. APIKit Router:
+          1. Validates the request against the RAML spec (method, URI, headers)
+          2. Routes to the correct implementation flow based on method + path
+          3. Returns 404/405/400 automatically for invalid requests
+    -->
+
+    <flow name="youtube-playlist-api-main" doc:name="YouTube Playlist API Main">
+
+        <http:listener config-ref="HTTP_Listener_Config"
+                       path="/api/*"
+                       doc:name="HTTP Listener" />
+
+        <apikit:router config-ref="APIKit_Config" doc:name="APIKit Router" />
+
+        <error-handler>
+            <!-- 400 Bad Request: request body/params do not match RAML spec -->
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="400 Bad Request">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Bad Request", message: error.description default "Request does not match API specification.", code: 400 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+
+            <!-- 404 Not Found: URI does not match any RAML resource -->
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="404 Not Found">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Not Found", message: "The requested resource does not exist.", code: 404 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+
+            <!-- 405 Method Not Allowed: HTTP method not defined for this resource in RAML -->
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="405 Method Not Allowed">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Method Not Allowed", message: "HTTP method is not supported for this resource.", code: 405 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+
+            <!-- 415 Unsupported Media Type -->
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="415 Unsupported Media Type">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Unsupported Media Type", message: "The request media type is not supported.", code: 415 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+
+            <!-- 406 Not Acceptable -->
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="406 Not Acceptable">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Not Acceptable", message: "The requested response media type is not supported.", code: 406 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+
+    </flow>
+
+
+    <!-- ==================== APIKit Console (optional, disable in prod) ==================== -->
+    <!--
+        Serves an interactive API console at:  http://localhost:8081/api/console
+        Remove or comment this flow before deploying to production.
+    -->
+
+    <flow name="youtube-playlist-api-console" doc:name="APIKit Console">
+        <http:listener config-ref="HTTP_Listener_Config"
+                       path="/api/console/*"
+                       doc:name="HTTP Listener - Console" />
+        <apikit:console config-ref="APIKit_Config" doc:name="APIKit Console" />
+    </flow>
+
+
+   
+
+    
+
+
+    
+
+</mule>

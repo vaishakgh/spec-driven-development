@@ -1,0 +1,30 @@
+# Anypoint Studio
+.project
+.classpath
+.factorypath
+.settings/
+.mule/
+
+# Maven build output
+target/
+*.class
+
+# API Keys - NEVER commit real secrets!
+src/main/resources/config.yaml
+src/main/resources/properties/config-local.yaml
+src/main/resources/properties/config-dev.yaml
+src/main/resources/properties/config-prod.yaml
+
+# Mac OS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+log4j2-test.xml
+
+# IntelliJ / VS Code
+.idea/
+*.iml
+.vscode/

@@ -1,0 +1,8 @@
+{
+  "minMuleVersion": "4.6.0",
+  "javaSpecificationVersions": [
+    "8",
+    "11",
+    "17"
+  ]
+}

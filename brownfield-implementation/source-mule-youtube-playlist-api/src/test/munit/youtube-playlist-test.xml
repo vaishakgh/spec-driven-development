@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core
+        http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/munit
+        http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+        http://www.mulesoft.org/schema/mule/munit-tools
+        http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+        http://www.mulesoft.org/schema/mule/http
+        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/core
+        http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- ==================== MUNIT CONFIGURATION ==================== -->
+
+    <!--
+        global-property sets env=test BEFORE configuration-properties resolves,
+        so ${env} in the main Mule XML expands to "test" and loads
+        src/test/resources/properties/config-test.yaml (no real API keys needed).
+    -->
+    <global-property name="env" value="test" doc:name="Set env=test for MUnit"/>
+
+    <munit:config name="youtube-playlist-test.xml" doc:name="MUnit Config"/>
+
+
+    <!-- ================================================================
+         FLOW 1 TESTS: GET /youtube/playlists/{playlistId}
+         ================================================================ -->
+
+    <!-- TEST 1: Successful playlist response -->
+    <munit:test name="test-get-youtube-playlists-success"
+                doc:name="Test: Get Playlist - 200 Success"
+                description="Verifies that a valid playlistId returns a correctly transformed playlist response">
+
+        <munit:behavior>
+            <!--
+                Mock payload value must be a plain JSON string — NOT a DataWeave #[{}] object literal.
+                A #[{}] expression returns a Java LinkedHashMap which is not stream-compatible
+                with application/json. Using output application/json inside #[] serialises it properly.
+            -->
+            <munit-tools:mock-when
+                doc:name="Mock YouTube Playlist API"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/playlistItems"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload mediaType="application/json" value='#[output application/json --- {
+                        "kind"          : "youtube#playlistItemListResponse",
+                        "pageInfo"      : { "totalResults": 2, "resultsPerPage": 25 },
+                        "nextPageToken" : "token123",
+                        "items"         : [
+                            {
+                                "snippet": {
+                                    "position"    : 0,
+                                    "title"       : "Song One",
+                                    "description" : "First song description",
+                                    "publishedAt" : "2024-01-01T00:00:00Z",
+                                    "thumbnails"  : { "medium": { "url": "https://img.youtube.com/vi/abc123/mqdefault.jpg" } }
+                                },
+                                "contentDetails": { "videoId": "abc123" }
+                            },
+                            {
+                                "snippet": {
+                                    "position"    : 1,
+                                    "title"       : "Song Two",
+                                    "description" : "Second song description",
+                                    "publishedAt" : "2024-02-01T00:00:00Z",
+                                    "thumbnails"  : { "medium": { "url": "https://img.youtube.com/vi/def456/mqdefault.jpg" } }
+                                },
+                                "contentDetails": { "videoId": "def456" }
+                            }
+                        ]
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set Incoming HTTP Event">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{
+                    "uriParams" : { "playlistId": "PLtest12345" },
+                    "method"    : "GET",
+                    "headers"   : {}
+                }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\playlists\(playlistId):APIKit_Config" doc:name="Run Playlist Flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert totalResults is 2"
+                expression="#[payload.totalResults]"
+                is="#[MunitTools::equalTo(2)]"/>
+            <munit-tools:assert-that doc:name="Assert playlist has 2 items"
+                expression="#[sizeOf(payload.playlist)]"
+                is="#[MunitTools::equalTo(2)]"/>
+            <munit-tools:assert-that doc:name="Assert first song title"
+                expression="#[payload.playlist[0].title]"
+                is="#[MunitTools::equalTo('Song One')]"/>
+            <munit-tools:assert-that doc:name="Assert first song videoId"
+                expression="#[payload.playlist[0].videoId]"
+                is="#[MunitTools::equalTo('abc123')]"/>
+            <munit-tools:assert-that doc:name="Assert videoUrl is correctly formed"
+                expression="#[payload.playlist[0].videoUrl]"
+                is="#[MunitTools::equalTo('https://www.youtube.com/watch?v=abc123')]"/>
+            <munit-tools:assert-that doc:name="Assert nextPageToken present"
+                expression="#[payload.nextPageToken]"
+                is="#[MunitTools::equalTo('token123')]"/>
+        </munit:validation>
+
+    </munit:test>
+
+
+    <!-- TEST 2: Empty playlist (no items) -->
+    <munit:test name="test-get-youtube-playlists-empty"
+                doc:name="Test: Get Playlist - Empty Playlist"
+                description="Verifies that an empty YouTube playlist returns totalResults=0 and empty playlist array">
+
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock YouTube API - Empty Playlist"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/playlistItems"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload mediaType="application/json" value='#[output application/json --- {
+                        "kind"    : "youtube#playlistItemListResponse",
+                        "pageInfo": { "totalResults": 0, "resultsPerPage": 25 },
+                        "items"   : []
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set HTTP Event - Empty Playlist">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{ "uriParams": { "playlistId": "PLempty" }, "method": "GET", "headers": {} }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\playlists\(playlistId):APIKit_Config" doc:name="Run Playlist Flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert totalResults is 0"
+                expression="#[payload.totalResults]"
+                is="#[MunitTools::equalTo(0)]"/>
+            <munit-tools:assert-that doc:name="Assert playlist is empty array"
+                expression="#[sizeOf(payload.playlist)]"
+                is="#[MunitTools::equalTo(0)]"/>
+        </munit:validation>
+
+    </munit:test>
+
+
+    <!-- TEST 3: Unauthorized (invalid API key) -->
+    <munit:test name="test-get-youtube-playlists-unauthorized"
+                doc:name="Test: Get Playlist - 401 Unauthorized"
+                description="Verifies that an invalid API key triggers the 401 error handler"
+                expectedErrorType="HTTP:UNAUTHORIZED">
+
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock YouTube API - 401 Unauthorized"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/playlistItems"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:error typeId="HTTP:UNAUTHORIZED"/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set HTTP Event - Bad API Key">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{ "uriParams": { "playlistId": "PLbadkey" }, "method": "GET", "headers": {} }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\playlists\(playlistId):APIKit_Config" doc:name="Run Playlist Flow"/>
+        </munit:execution>
+
+    </munit:test>
+
+
+    <!-- TEST 4: Connectivity error -->
+    <munit:test name="test-get-youtube-playlists-connectivity-error"
+                doc:name="Test: Get Playlist - 503 Connectivity Error"
+                description="Verifies that a connectivity failure triggers the 503 error handler"
+                expectedErrorType="HTTP:CONNECTIVITY">
+
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock YouTube API - Connectivity Error"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/playlistItems"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:error typeId="HTTP:CONNECTIVITY"/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set HTTP Event - Connection Failure">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{ "uriParams": { "playlistId": "PLoffline" }, "method": "GET", "headers": {} }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\playlists\(playlistId):APIKit_Config" doc:name="Run Playlist Flow"/>
+        </munit:execution>
+
+    </munit:test>
+
+
+    <!-- ================================================================
+         FLOW 2 TESTS: GET /youtube/song/{videoId}
+         ================================================================ -->
+
+    <!-- TEST 5: Successful song detail response -->
+    <munit:test name="test-get-youtube-song-by-id-success"
+                doc:name="Test: Get Song By ID - 200 Success"
+                description="Verifies that a valid videoId returns correctly transformed song details">
+
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock YouTube Videos API"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/videos"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload mediaType="application/json" value='#[output application/json --- {
+                        "kind" : "youtube#videoListResponse",
+                        "items": [
+                            {
+                                "id"            : "dQw4w9WgXcQ",
+                                "snippet"       : {
+                                    "title"        : "Never Gonna Give You Up",
+                                    "description"  : "The classic Rick Astley hit.",
+                                    "channelTitle" : "RickAstleyVEVO",
+                                    "publishedAt"  : "2009-10-25T06:57:33Z",
+                                    "thumbnails"   : {
+                                        "high": { "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" }
+                                    }
+                                },
+                                "contentDetails": { "duration": "PT3M33S" },
+                                "statistics"    : { "viewCount": "1400000000", "likeCount": "15000000" }
+                            }
+                        ]
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set HTTP Event - Valid Video ID">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{ "uriParams": { "videoId": "dQw4w9WgXcQ" }, "method": "GET", "headers": {} }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\song\(videoId):APIKit_Config" doc:name="Run Song By ID Flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert videoId is correct"
+                expression="#[payload.videoId]"
+                is="#[MunitTools::equalTo('dQw4w9WgXcQ')]"/>
+            <munit-tools:assert-that doc:name="Assert title is correct"
+                expression="#[payload.title]"
+                is="#[MunitTools::equalTo('Never Gonna Give You Up')]"/>
+            <munit-tools:assert-that doc:name="Assert channelName is correct"
+                expression="#[payload.channelName]"
+                is="#[MunitTools::equalTo('RickAstleyVEVO')]"/>
+            <munit-tools:assert-that doc:name="Assert duration is present"
+                expression="#[payload.duration]"
+                is="#[MunitTools::equalTo('PT3M33S')]"/>
+            <munit-tools:assert-that doc:name="Assert viewCount is present"
+                expression="#[payload.viewCount]"
+                is="#[MunitTools::equalTo('1400000000')]"/>
+            <munit-tools:assert-that doc:name="Assert videoUrl is correctly formed"
+                expression="#[payload.videoUrl]"
+                is="#[MunitTools::equalTo('https://www.youtube.com/watch?v=dQw4w9WgXcQ')]"/>
+            <munit-tools:assert-that doc:name="Assert thumbnail URL is present"
+                expression="#[payload.thumbnail]"
+                is="#[MunitTools::not(MunitTools::nullValue())]"/>
+        </munit:validation>
+
+    </munit:test>
+
+
+    <!-- TEST 6: Video not found (empty items array) -->
+    <munit:test name="test-get-youtube-song-not-found"
+                doc:name="Test: Get Song By ID - Video Not Found"
+                description="Verifies that a non-existent videoId returns an empty/default response">
+
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock YouTube Videos API - Not Found"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/videos"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload mediaType="application/json" value='#[output application/json --- {
+                        "kind" : "youtube#videoListResponse",
+                        "items": []
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set HTTP Event - Invalid Video ID">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{ "uriParams": { "videoId": "INVALID_ID" }, "method": "GET", "headers": {} }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\song\(videoId):APIKit_Config" doc:name="Run Song By ID Flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that doc:name="Assert videoId is null for missing video"
+                expression="#[payload.videoId]"
+                is="#[MunitTools::nullValue()]"/>
+            <munit-tools:assert-that doc:name="Assert videoUrl defaults to empty watch URL"
+                expression="#[payload.videoUrl]"
+                is="#[MunitTools::equalTo('https://www.youtube.com/watch?v=')]"/>
+        </munit:validation>
+
+    </munit:test>
+
+
+    <!-- TEST 7: Song flow - generic error handler -->
+    <munit:test name="test-get-youtube-song-generic-error"
+                doc:name="Test: Get Song By ID - 500 Generic Error"
+                description="Verifies that an unexpected error triggers the generic 500 error handler"
+                expectedErrorType="MULE:UNKNOWN">
+
+        <munit:behavior>
+            <munit-tools:mock-when
+                doc:name="Mock YouTube Videos API - Generic Error"
+                processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="YouTube_Request_Config"/>
+                    <munit-tools:with-attribute attributeName="path" whereValue="/videos"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:error typeId="MULE:UNKNOWN"/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <munit:set-event doc:name="Set HTTP Event - Unknown Error">
+                <munit:payload value='#[null]' mediaType="application/json"/>
+                <munit:attributes value='#[{ "uriParams": { "videoId": "errorId" }, "method": "GET", "headers": {} }]'/>
+            </munit:set-event>
+            <flow-ref name="get:\youtube\song\(videoId):APIKit_Config" doc:name="Run Song By ID Flow"/>
+        </munit:execution>
+
+    </munit:test>
+
+</mule>

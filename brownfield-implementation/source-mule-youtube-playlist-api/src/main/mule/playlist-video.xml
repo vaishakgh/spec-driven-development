@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	
+	<!-- ==================== FLOW 2: GET /youtube/song/{videoId} ==================== -->
+
+    <flow name="get:\youtube\song\(videoId):APIKit_Config" doc:name="GET /youtube/song/{videoId}">
+
+        <logger level="INFO"
+                message="#['[get-song] Fetching details for video ID: ' ++ attributes.uriParams.videoId]"
+                doc:name="Log Video ID" />
+
+        <http:request method="GET"
+                      config-ref="YouTube_Request_Config"
+                      path="/videos"
+                      doc:name="Call YouTube Videos API">
+            <http:query-params>
+                <![CDATA[#[{
+                    "part" : "snippet,contentDetails,statistics",
+                    "id"   : attributes.uriParams.videoId,
+                    "key"  : "${youtube.api.key}"
+                }]]]>
+            </http:query-params>
+        </http:request>
+
+        <ee:transform doc:name="Transform Song Detail">
+            <ee:message>
+                <ee:set-payload><![CDATA[
+                %dw 2.0
+                output application/json
+
+                var video = payload.items[0] default {}
+
+                ---
+                {
+                    videoId     : video.id,
+                    title       : video.snippet.title,
+                    description : video.snippet.description,
+                    channelName : video.snippet.channelTitle,
+                    publishedAt : video.snippet.publishedAt,
+                    duration    : video.contentDetails.duration,
+                    viewCount   : video.statistics.viewCount,
+                    likeCount   : video.statistics.likeCount,
+                    thumbnail   : video.snippet.thumbnails.high.url default null,
+                    videoUrl    : "https://www.youtube.com/watch?v=" ++ (video.id default "")
+                }
+                ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <error-handler>
+            <on-error-propagate type="HTTP:UNAUTHORIZED">
+                <ee:transform doc:name="401 Auth Error">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Unauthorized", message: "Invalid or missing YouTube API Key.", code: 401 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="HTTP:CONNECTIVITY">
+                <ee:transform doc:name="503 Connectivity Error">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Connection Error", message: "Unable to connect to YouTube API.", code: 503 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="ANY">
+                <ee:transform doc:name="500 Generic Error">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Error", message: error.description default "Unexpected error.", code: 500 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+
+    </flow>
+
+</mule>

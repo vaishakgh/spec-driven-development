@@ -1,0 +1,10 @@
+youtube:
+  api:
+    baseUrl: "www.googleapis.com"
+    key: "TEST_API_KEY_NOT_REAL"
+    maxResults: "25"
+
+http:
+  listener:
+    host: "0.0.0.0"
+    port: "8081"

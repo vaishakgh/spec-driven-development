@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<!-- ==================== FLOW 1: GET /youtube/playlists/{playlistId} ==================== -->
+
+    <flow name="get:\youtube\playlists\(playlistId):APIKit_Config" doc:name="GET /youtube/playlists/{playlistId}">
+
+        <logger level="INFO"
+                message="#['[get-playlists] Fetching playlist for ID: ' ++ attributes.uriParams.playlistId]"
+                doc:name="Log Request" />
+
+        <http:request method="GET"
+                      config-ref="YouTube_Request_Config"
+                      path="/playlistItems"
+                      doc:name="Call YouTube Playlist API">
+            <http:query-params>
+                <![CDATA[#[{
+                    "part"       : "snippet,contentDetails",
+                    "playlistId" : attributes.uriParams.playlistId,
+                    "maxResults" : "${youtube.api.maxResults}",
+                    "key"        : "${youtube.api.key}"
+                }]]]>
+            </http:query-params>
+        </http:request>
+
+        <ee:transform doc:name="Transform Playlist Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[
+                %dw 2.0
+                output application/json
+
+                var items = payload.items default []
+
+                ---
+                {
+                    totalResults   : payload.pageInfo.totalResults default 0,
+                    resultsPerPage : payload.pageInfo.resultsPerPage default 0,
+                    nextPageToken  : payload.nextPageToken default null,
+                    playlist: items map (item, index) -> {
+                        position    : item.snippet.position,
+                        videoId     : item.contentDetails.videoId,
+                        title       : item.snippet.title,
+                        description : item.snippet.description,
+                        publishedAt : item.snippet.publishedAt,
+                        thumbnail   : item.snippet.thumbnails.medium.url default null,
+                        videoUrl    : "https://www.youtube.com/watch?v=" ++ item.contentDetails.videoId
+                    }
+                }
+                ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <logger level="INFO"
+                message="#['[get-playlists] Total songs found: ' ++ (payload.totalResults as String)]"
+                doc:name="Log Results" />
+
+        <error-handler>
+            <on-error-propagate type="HTTP:UNAUTHORIZED">
+                <ee:transform doc:name="401 Auth Error">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Unauthorized", message: "Invalid or missing YouTube API Key.", code: 401 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="HTTP:CONNECTIVITY">
+                <ee:transform doc:name="503 Connectivity Error">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Connection Error", message: "Unable to connect to YouTube API.", code: 503 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="ANY">
+                <ee:transform doc:name="500 Generic Error">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[
+                        %dw 2.0
+                        output application/json
+                        ---
+                        { error: "Internal Server Error", message: error.description default "Unexpected error.", code: 500 }
+                        ]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+
+    </flow>
+	
+	
+	
+
+</mule>

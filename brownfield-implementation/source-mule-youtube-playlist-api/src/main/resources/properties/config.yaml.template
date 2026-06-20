@@ -1,0 +1,4 @@
+youtube:
+  api:
+    baseUrl: "googleapis.com"
+    maxResults: "25"

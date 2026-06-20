@@ -1,0 +1,273 @@
+#%RAML 1.0
+title: YouTube Playlist API
+version: v1
+baseUri: https://youtube-playlist-api.cloudhub.io
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      The YouTube Playlist API is a MuleSoft-powered integration layer that proxies
+      the YouTube Data API v3. It exposes two endpoints to retrieve playlist items
+      and individual video details, returning cleaned and transformed JSON responses.
+
+  - title: Authentication
+    content: |
+      This API uses an internal YouTube Data API v3 key configured via environment
+      properties. Consumers of this API do not need to supply an API key directly.
+
+  - title: Error Handling
+    content: |
+      All endpoints return standardised error objects with the following structure:
+        - `error`   — Short error type label
+        - `message` — Human-readable description
+        - `code`    — HTTP status code (401, 503, 500)
+
+# ─────────────────────────────────────────────
+# REUSABLE TYPES
+# ─────────────────────────────────────────────
+
+types:
+
+  PlaylistItem:
+    description: A single item (song/video) within a YouTube playlist
+    type: object
+    properties:
+      position:
+        type: integer
+        description: Zero-based position of this item in the playlist
+        example: 0
+      videoId:
+        type: string
+        description: YouTube video identifier
+        example: dQw4w9WgXcQ
+      title:
+        type: string
+        description: Title of the video
+        example: "Never Gonna Give You Up"
+      description:
+        type: string
+        description: Video description text
+        example: "The official music video for Rick Astley's Never Gonna Give You Up."
+      publishedAt:
+        type: datetime
+        format: rfc3339
+        description: ISO 8601 timestamp when the video was published
+        example: "2009-10-25T06:57:33Z"
+      thumbnail:
+        type: string | nil
+        description: URL of the medium-quality thumbnail image
+        example: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg"
+      videoUrl:
+        type: string
+        description: Full YouTube watch URL for the video
+        example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+  PlaylistResponse:
+    description: Transformed response returned by the GET /youtube/playlists/{playlistId} endpoint
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: Total number of items in the playlist (as reported by YouTube)
+        example: 50
+      resultsPerPage:
+        type: integer
+        description: Maximum number of results returned per page
+        example: 25
+      nextPageToken:
+        type: string | nil
+        description: Token to retrieve the next page of results. Null if no further pages.
+        example: "EAAelgEKADiD..."
+      playlist:
+        type: PlaylistItem[]
+        description: Array of playlist items for the current page
+
+  SongDetail:
+    description: Detailed metadata for a single YouTube video
+    type: object
+    properties:
+      videoId:
+        type: string
+        description: YouTube video identifier
+        example: dQw4w9WgXcQ
+      title:
+        type: string
+        description: Title of the video
+        example: "Never Gonna Give You Up"
+      description:
+        type: string
+        description: Full description of the video
+        example: "The official music video for Rick Astley's Never Gonna Give You Up."
+      channelName:
+        type: string
+        description: Name of the YouTube channel that uploaded the video
+        example: "RickAstleyVEVO"
+      publishedAt:
+        type: datetime
+        format: rfc3339
+        description: ISO 8601 timestamp when the video was originally published
+        example: "2009-10-25T06:57:33Z"
+      duration:
+        type: string
+        description: ISO 8601 duration string (e.g. PT3M33S = 3 minutes and 33 seconds)
+        example: "PT3M33S"
+      viewCount:
+        type: string
+        description: Total number of views (returned as string by YouTube API)
+        example: "1400000000"
+      likeCount:
+        type: string
+        description: Total number of likes (returned as string by YouTube API)
+        example: "15000000"
+      thumbnail:
+        type: string | nil
+        description: URL of the high-quality thumbnail image
+        example: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+      videoUrl:
+        type: string
+        description: Full YouTube watch URL for the video
+        example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+  ErrorResponse:
+    description: Standard error response returned on all error conditions
+    type: object
+    properties:
+      error:
+        type: string
+        description: Short label describing the error category
+        example: "Unauthorized"
+      message:
+        type: string
+        description: Human-readable description of what went wrong
+        example: "Invalid or missing YouTube API Key."
+      code:
+        type: integer
+        description: HTTP status code associated with the error
+        example: 401
+
+
+# ─────────────────────────────────────────────
+# REUSABLE RESPONSE TRAITS
+# ─────────────────────────────────────────────
+
+traits:
+
+  commonErrors:
+    responses:
+      401:
+        description: The YouTube API key is invalid or missing.
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              error: "Unauthorized"
+              message: "Invalid or missing YouTube API Key."
+              code: 401
+      503:
+        description: Could not establish a connection to the YouTube API.
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              error: "Connection Error"
+              message: "Unable to connect to YouTube API."
+              code: 503
+      500:
+        description: An unexpected internal server error occurred.
+        body:
+          application/json:
+            type: ErrorResponse
+            example:
+              error: "Internal Server Error"
+              message: "Unexpected error."
+              code: 500
+
+
+# ─────────────────────────────────────────────
+# RESOURCES & ENDPOINTS
+# ─────────────────────────────────────────────
+
+/youtube:
+
+  /playlists:
+    description: Operations related to YouTube playlists
+
+    /{playlistId}:
+      description: Retrieve all videos from a specific YouTube playlist
+      uriParameters:
+        playlistId:
+          type: string
+          required: true
+          description: The unique identifier of the YouTube playlist (e.g. PLxxxxxx)
+          example: "PLbpi6ZahtOH6Ar_3GPy3workP3aUa5QGD"
+
+      get:
+        is: [commonErrors]
+        displayName: Get Playlist Items
+        description: |
+          Fetches all items (videos/songs) from the specified YouTube playlist.
+          Results are paginated — use `nextPageToken` from the response to page through large playlists.
+          The number of results per page is configured server-side (default: 25, max: 50).
+        responses:
+          200:
+            description: Successfully retrieved playlist items
+            body:
+              application/json:
+                type: PlaylistResponse
+                example:
+                  totalResults: 2
+                  resultsPerPage: 25
+                  nextPageToken: null
+                  playlist:
+                    - position: 0
+                      videoId: "dQw4w9WgXcQ"
+                      title: "Never Gonna Give You Up"
+                      description: "The official music video."
+                      publishedAt: "2009-10-25T06:57:33Z"
+                      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg"
+                      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    - position: 1
+                      videoId: "9bZkp7q19f0"
+                      title: "GANGNAM STYLE"
+                      description: "PSY's Gangnam Style."
+                      publishedAt: "2012-07-15T07:46:32Z"
+                      thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg"
+                      videoUrl: "https://www.youtube.com/watch?v=9bZkp7q19f0"
+
+  /song:
+    description: Operations to retrieve individual YouTube video details
+
+    /{videoId}:
+      description: Retrieve detailed metadata for a specific YouTube video
+      uriParameters:
+        videoId:
+          type: string
+          required: true
+          description: The unique YouTube video identifier (11-character string)
+          example: "dQw4w9WgXcQ"
+
+      get:
+        is: [commonErrors]
+        displayName: Get Song Details by Video ID
+        description: |
+          Fetches detailed metadata for a single YouTube video including snippet,
+          content details (duration), and statistics (views, likes).
+          Returns an empty/default object if the videoId does not exist.
+        responses:
+          200:
+            description: Successfully retrieved video details
+            body:
+              application/json:
+                type: SongDetail
+                example:
+                  videoId: "dQw4w9WgXcQ"
+                  title: "Never Gonna Give You Up"
+                  description: "The official music video for Rick Astley's Never Gonna Give You Up."
+                  channelName: "RickAstleyVEVO"
+                  publishedAt: "2009-10-25T06:57:33Z"
+                  duration: "PT3M33S"
+                  viewCount: "1400000000"
+                  likeCount: "15000000"
+                  thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+                  videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
