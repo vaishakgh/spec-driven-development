@@ -4,7 +4,7 @@ baseline_commit: b1318e8096366d5200c2744cb42f5ae8816d8e20
 
 # Story 3.3: Implement VideoController with 404 Handling for Missing Videos
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -33,32 +33,32 @@ so that the API uses correct HTTP semantics instead of the current Mule behaviou
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Create `VideoController` (AC: 1–4)
-  - [ ] Create `src/main/java/com/example/youtubeplaylistapi/controller/VideoController.java`
-  - [ ] Annotate with `@RestController`
-  - [ ] Constructor-inject `VideoService`
-  - [ ] Implement generated `VideoApi` interface (`implements VideoApi`)
-  - [ ] Override `getVideoDetails(String videoId)`
-  - [ ] Log request entry: `log.info("endpoint={} videoId={}", "GET /api/youtube/song/{videoId}", videoId)`
-  - [ ] Call `videoService.getVideo(videoId)` — this either returns `SongDetail` or throws `VideoNotFoundException`
-  - [ ] Log success: `log.info("endpoint={} videoId={}", "GET /api/youtube/song/{videoId}", songDetail.getVideoId())`
-  - [ ] Return `ResponseEntity.ok(songDetail)`
-  - [ ] No try/catch — let all exceptions propagate to `GlobalExceptionHandler`
-  - [ ] No null check in controller — `VideoService` throws `VideoNotFoundException` instead of returning null
+- [x] Task 1 — Create `VideoController` (AC: 1–4)
+  - [x] Create `src/main/java/com/example/youtubeplaylistapi/controller/VideoController.java`
+  - [x] Annotate with `@RestController`
+  - [x] Constructor-inject `VideoService`
+  - [x] Implement generated `VideoApi` interface (`implements VideoApi`)
+  - [x] Override `getVideoDetails(String videoId)`
+  - [x] Log request entry: `log.info("endpoint={} videoId={}", "GET /api/youtube/song/{videoId}", videoId)`
+  - [x] Call `videoService.getVideo(videoId)` — this either returns `SongDetail` or throws `VideoNotFoundException`
+  - [x] Log success: `log.info("endpoint={} videoId={}", "GET /api/youtube/song/{videoId}", songDetail.getVideoId())`
+  - [x] Return `ResponseEntity.ok(songDetail)`
+  - [x] No try/catch — let all exceptions propagate to `GlobalExceptionHandler`
+  - [x] No null check in controller — `VideoService` throws `VideoNotFoundException` instead of returning null
 
-- [ ] Task 2 — Write unit tests (AC: 1–4)
-  - [ ] Create `src/test/java/com/example/youtubeplaylistapi/controller/VideoControllerTest.java`
-  - [ ] Use `@WebMvcTest(VideoController.class)` with `@MockitoBean VideoService videoService`
-  - [ ] `should_return_200_when_valid_video_id()` — mock service returns `SongDetail`, assert 200 and key fields (AC 1)
-  - [ ] `should_return_404_when_video_not_found()` — mock service throws `VideoNotFoundException`, assert 404 + ErrorResponse body with correct message (AC 2)
-  - [ ] `should_return_401_when_youtube_unauthorized()` — mock service throws `UpstreamUnauthorizedException`, assert 401 (AC 3)
-  - [ ] `should_return_503_when_youtube_unreachable()` — mock service throws `WebClientRequestException`, assert 503 (AC 4)
-  - [ ] Run `mvn test` — all tests pass
+- [x] Task 2 — Write unit tests (AC: 1–4)
+  - [x] Create `src/test/java/com/example/youtubeplaylistapi/controller/VideoControllerTest.java`
+  - [x] Use `@ExtendWith(MockitoExtension.class)` + `MockMvcBuilders.standaloneSetup()` pattern (matching project convention; `@WebMvcTest` not available in this project setup)
+  - [x] `should_return_200_when_valid_video_id()` — mock service returns `SongDetail`, assert 200 and key fields (AC 1)
+  - [x] `should_return_404_when_video_not_found()` — mock service throws `VideoNotFoundException`, assert 404 + ErrorResponse body with correct message (AC 2)
+  - [x] `should_return_401_when_youtube_unauthorized()` — mock service throws `UpstreamUnauthorizedException`, assert 401 (AC 3)
+  - [x] `should_return_503_when_youtube_unreachable()` — mock service throws `WebClientRequestException`, assert 503 (AC 4)
+  - [x] Run `mvn test` — all tests pass
 
-- [ ] Task 3 — Compile and verify (AC: all)
-  - [ ] Run `mvn generate-sources compile` — no errors
-  - [ ] Run `mvn test` — all tests pass (no regressions)
-  - [ ] Confirm endpoint `GET /api/youtube/song/{videoId}` is reachable and returns `SongDetail` shape
+- [x] Task 3 — Compile and verify (AC: all)
+  - [x] Run `mvn generate-sources compile` — no errors
+  - [x] Run `mvn test` — all tests pass (no regressions)
+  - [x] Confirm endpoint `GET /api/youtube/song/{videoId}` is reachable and returns `SongDetail` shape
 
 ## Dev Notes
 
@@ -372,6 +372,29 @@ claude-sonnet-4-6 (bmad-create-story 2026-06-21)
 
 ### Debug Log References
 
+- Story spec called for `@WebMvcTest` but that annotation is not available in this project's dependency setup. Used `MockMvcBuilders.standaloneSetup()` with `GlobalExceptionHandler` controller advice — matching the established `PlaylistControllerTest` pattern. All 4 ACs validated by tests.
+
 ### Completion Notes List
 
+- Task 1: `VideoController` created as `@RestController implements VideoApi`. Pure delegation — no try/catch, no null check. Logs request entry and success. Returns `ResponseEntity.ok(songDetail)`.
+- Task 2: `VideoControllerTest` using `@ExtendWith(MockitoExtension.class)` + `standaloneSetup` (project convention). 4 tests: 200 with SongDetail (AC 1), 404 with ErrorResponse body (AC 2), 401 (AC 3), 503 (AC 4). All pass.
+- Task 3: `mvn test` — 29 tests run, 0 failures, 0 errors. No regressions.
+
 ### File List
+
+- `dest-spring-youtube-playlist-api/src/main/java/com/example/youtubeplaylistapi/controller/VideoController.java` (NEW)
+- `dest-spring-youtube-playlist-api/src/test/java/com/example/youtubeplaylistapi/controller/VideoControllerTest.java` (NEW)
+
+### Change Log
+
+- 2026-06-21: Story 3.3 complete — `VideoController` and `VideoControllerTest` implemented; 4 new controller tests pass; full suite 29/29 green. Used standaloneSetup pattern (matching project convention) instead of @WebMvcTest.
+
+## Senior Developer Review (AI)
+
+**Review date:** 2026-06-21
+**Reviewer layers:** Blind Hunter, Edge Case Hunter, Acceptance Auditor
+**Scope:** Epic 3 (Stories 3.1–3.3) + Epic 5 (Stories 5.1–5.2)
+
+### Review Findings
+
+- [x] [Review][Defer] No videoId path parameter validation [`VideoController.java`] — deferred, OAS-spec–generated `VideoApi` interface handles path variable binding via Spring routing; explicit validation of path segment not required by story spec

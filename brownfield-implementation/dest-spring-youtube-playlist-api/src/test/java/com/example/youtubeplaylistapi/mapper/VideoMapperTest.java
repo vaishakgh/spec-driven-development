@@ -51,6 +51,39 @@ class VideoMapperTest {
         assertThat(result).isNull();
     }
 
+    @Test
+    void should_return_null_when_snippet_is_absent() {
+        YTVideoDetailsResponse yt = buildFullResponse();
+        yt.getItems().get(0).setSnippet(null);
+
+        SongDetail result = mapper.toSongDetail(yt);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void should_set_null_duration_when_contentDetails_is_absent() {
+        YTVideoDetailsResponse yt = buildFullResponse();
+        yt.getItems().get(0).setContentDetails(null);
+
+        SongDetail result = mapper.toSongDetail(yt);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getDuration()).isNull();
+    }
+
+    @Test
+    void should_set_null_counts_when_statistics_is_absent() {
+        YTVideoDetailsResponse yt = buildFullResponse();
+        yt.getItems().get(0).setStatistics(null);
+
+        SongDetail result = mapper.toSongDetail(yt);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getViewCount()).isNull();
+        assertThat(result.getLikeCount()).isNull();
+    }
+
     // --- helper ---
 
     private YTVideoDetailsResponse buildFullResponse() {

@@ -1,6 +1,10 @@
+---
+baseline_commit: 9b9d277885d0e71d46de200e8839fa49a16c7ae8
+---
+
 # Story 7.1: Create Dockerfile and Kubernetes Manifests
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -17,23 +21,23 @@ so that the service can be built into a container image and deployed to Kubernet
 
 ## Tasks / Subtasks
 
-- [ ] Create `Dockerfile` in project root (AC: 1, 2)
-  - [ ] Stage 1: `eclipse-temurin:21-jdk-alpine` — build fat JAR with Maven wrapper, `-DskipTests`
-  - [ ] Stage 2: `eclipse-temurin:21-jre-alpine` — copy JAR, EXPOSE 8081, ENTRYPOINT
-- [ ] Create `.dockerignore` in project root (AC: 1)
-  - [ ] Exclude `target/`, `.git/`, `docs/`
-- [ ] Create `k8s/` directory and `k8s/deployment.yaml` (AC: 3)
-  - [ ] 1–2 replicas
-  - [ ] Resource limits: cpu 100m/250m, memory 256Mi/512Mi
-  - [ ] `YOUTUBE_API_KEY` from Secret (secretKeyRef)
-  - [ ] `SPRING_PROFILES_ACTIVE=dev` (or `prod`) from ConfigMap
-  - [ ] Liveness probe: GET /actuator/health/liveness port 8081
-  - [ ] Readiness probe: GET /actuator/health/readiness port 8081
-- [ ] Create `k8s/service.yaml` (AC: 4)
-  - [ ] ClusterIP, port 8081
-- [ ] Create `k8s/configmap.yaml` (AC: 4)
-  - [ ] `youtube.api.base-url`, `youtube.api.max-results` (NOT `youtube.api.key`)
-  - [ ] `SPRING_PROFILES_ACTIVE`
+- [x] Create `Dockerfile` in project root (AC: 1, 2)
+  - [x] Stage 1: `eclipse-temurin:21-jdk-alpine` — build fat JAR with Maven wrapper, `-DskipTests`
+  - [x] Stage 2: `eclipse-temurin:21-jre-alpine` — copy JAR, EXPOSE 8081, ENTRYPOINT
+- [x] Create `.dockerignore` in project root (AC: 1)
+  - [x] Exclude `target/`, `.git/`, `docs/`
+- [x] Create `k8s/` directory and `k8s/deployment.yaml` (AC: 3)
+  - [x] 1–2 replicas
+  - [x] Resource limits: cpu 100m/250m, memory 256Mi/512Mi
+  - [x] `YOUTUBE_API_KEY` from Secret (secretKeyRef)
+  - [x] `SPRING_PROFILES_ACTIVE=dev` (or `prod`) from ConfigMap
+  - [x] Liveness probe: GET /actuator/health/liveness port 8081
+  - [x] Readiness probe: GET /actuator/health/readiness port 8081
+- [x] Create `k8s/service.yaml` (AC: 4)
+  - [x] ClusterIP, port 8081
+- [x] Create `k8s/configmap.yaml` (AC: 4)
+  - [x] `youtube.api.base-url`, `youtube.api.max-results` (NOT `youtube.api.key`)
+  - [x] `SPRING_PROFILES_ACTIVE`
 
 ## Dev Notes
 
@@ -269,4 +273,16 @@ claude-sonnet-4-6
 
 ### Completion Notes List
 
+- Dockerfile: 2-stage build using eclipse-temurin:21-jdk-alpine (builder) → eclipse-temurin:21-jre-alpine (runtime). Dependency layer caching via `dependency:go-offline` before src copy. `-DskipTests` in package stage. EXPOSE 8081.
+- .dockerignore: Excludes target/, .git/, .gitignore, docs/, *.md, .mvn/repository/
+- k8s/deployment.yaml: 1 replica, NFR-4 resource limits (cpu 100m/250m, memory 256Mi/512Mi), YOUTUBE_API_KEY from secretKeyRef (NOT configMapKeyRef), SPRING_PROFILES_ACTIVE from configMapKeyRef, liveness probe at /actuator/health/liveness (delay 30s), readiness probe at /actuator/health/readiness (delay 15s)
+- k8s/service.yaml: ClusterIP on port 8081
+- k8s/configmap.yaml: SPRING_PROFILES_ACTIVE=dev, YOUTUBE_API_BASE_URL, YOUTUBE_API_MAX_RESULTS — no YOUTUBE_API_KEY (that goes in Secret)
+
 ### File List
+
+- Dockerfile (new)
+- .dockerignore (new)
+- k8s/deployment.yaml (new)
+- k8s/service.yaml (new)
+- k8s/configmap.yaml (new)

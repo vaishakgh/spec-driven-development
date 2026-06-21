@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: youtube-playlist-api-config
+data:
+  SPRING_PROFILES_ACTIVE: "dev"
+  YOUTUBE_API_BASE_URL: "https://www.googleapis.com/youtube/v3"
+  YOUTUBE_API_MAX_RESULTS: "25"

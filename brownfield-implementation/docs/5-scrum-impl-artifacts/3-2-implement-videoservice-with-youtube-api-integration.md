@@ -4,7 +4,7 @@ baseline_commit: b1318e8096366d5200c2744cb42f5ae8816d8e20
 
 # Story 3.2: Implement VideoService with YouTube API Integration
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -33,33 +33,33 @@ so that real video metadata is retrieved from YouTube and made available to the 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Create `VideoService` (AC: 1–4)
-  - [ ] Create `src/main/java/com/example/youtubeplaylistapi/service/VideoService.java`
-  - [ ] Annotate with `@Service`
-  - [ ] Constructor-inject: `WebClient webClient`, `VideoMapper videoMapper`, `@Value("${youtube.api.key}") String apiKey`
-  - [ ] Note: NO `maxResults` injection (unlike PlaylistService — `/videos` has no pagination)
-  - [ ] Public method: `SongDetail getVideo(String videoId)`
-  - [ ] Build URI: `uriBuilder.path("/videos").queryParam("part", "snippet,statistics,contentDetails").queryParam("id", videoId).queryParam("key", apiKey).build()`
-  - [ ] Chain `.retrieve().onStatus(status -> status.value() == 401, resp -> Mono.error(new UpstreamUnauthorizedException())).bodyToMono(YTVideoDetailsResponse.class).block()`
-  - [ ] Call `videoMapper.toSongDetail(ytResponse)` → store in local variable
-  - [ ] If mapper returns `null` → throw `new VideoNotFoundException()`
-  - [ ] Otherwise return the `SongDetail`
-  - [ ] Do NOT catch `WebClientRequestException` — let it propagate
+- [x] Task 1 — Create `VideoService` (AC: 1–4)
+  - [x] Create `src/main/java/com/example/youtubeplaylistapi/service/VideoService.java`
+  - [x] Annotate with `@Service`
+  - [x] Constructor-inject: `WebClient webClient`, `VideoMapper videoMapper`, `@Value("${youtube.api.key}") String apiKey`
+  - [x] Note: NO `maxResults` injection (unlike PlaylistService — `/videos` has no pagination)
+  - [x] Public method: `SongDetail getVideo(String videoId)`
+  - [x] Build URI: `uriBuilder.path("/videos").queryParam("part", "snippet,statistics,contentDetails").queryParam("id", videoId).queryParam("key", apiKey).build()`
+  - [x] Chain `.retrieve().onStatus(status -> status.value() == 401, resp -> Mono.error(new UpstreamUnauthorizedException())).bodyToMono(YTVideoDetailsResponse.class).block()`
+  - [x] Call `videoMapper.toSongDetail(ytResponse)` → store in local variable
+  - [x] If mapper returns `null` → throw `new VideoNotFoundException()`
+  - [x] Otherwise return the `SongDetail`
+  - [x] Do NOT catch `WebClientRequestException` — let it propagate
 
-- [ ] Task 2 — Write unit tests (AC: 1–4)
-  - [ ] Create `src/test/java/com/example/youtubeplaylistapi/service/VideoServiceTest.java`
-  - [ ] Use `@WireMockTest` (JUnit 5 extension, dynamic port) — no Spring context, no `@SpringBootTest`
-  - [ ] Build `WebClient` and `VideoService` inline using `wmInfo.getHttpBaseUrl()` from `WireMockRuntimeInfo`
-  - [ ] `should_call_youtube_with_correct_params_and_return_song_detail()` — stub GET `/videos` with correct params, assert `SongDetail` returned with correct `videoId` and `channelName` (AC 1)
-  - [ ] `should_throw_upstream_unauthorized_when_youtube_returns_401()` — stub 401 response, assert `UpstreamUnauthorizedException` thrown (AC 2)
-  - [ ] `should_throw_video_not_found_when_items_array_is_empty()` — stub 200 with empty items[], assert `VideoNotFoundException` thrown (AC 4)
-  - [ ] Run `mvn test` — all tests pass
+- [x] Task 2 — Write unit tests (AC: 1–4)
+  - [x] Create `src/test/java/com/example/youtubeplaylistapi/service/VideoServiceTest.java`
+  - [x] Use `@WireMockTest` (JUnit 5 extension, dynamic port) — no Spring context, no `@SpringBootTest`
+  - [x] Build `WebClient` and `VideoService` inline using `wmInfo.getHttpBaseUrl()` from `WireMockRuntimeInfo`
+  - [x] `should_call_youtube_with_correct_params_and_return_song_detail()` — stub GET `/videos` with correct params, assert `SongDetail` returned with correct `videoId` and `channelName` (AC 1)
+  - [x] `should_throw_upstream_unauthorized_when_youtube_returns_401()` — stub 401 response, assert `UpstreamUnauthorizedException` thrown (AC 2)
+  - [x] `should_throw_video_not_found_when_items_array_is_empty()` — stub 200 with empty items[], assert `VideoNotFoundException` thrown (AC 4)
+  - [x] Run `mvn test` — all tests pass
 
-- [ ] Task 3 — Compile and verify (AC: all)
-  - [ ] Run `mvn generate-sources compile` — no errors
-  - [ ] Run `mvn test` — all tests pass (no regressions)
-  - [ ] Confirm `WebClientRequestException` is NOT caught in `VideoService`
-  - [ ] Confirm `VideoNotFoundException` is thrown when `videoMapper.toSongDetail()` returns `null`
+- [x] Task 3 — Compile and verify (AC: all)
+  - [x] Run `mvn generate-sources compile` — no errors
+  - [x] Run `mvn test` — all tests pass (no regressions)
+  - [x] Confirm `WebClientRequestException` is NOT caught in `VideoService`
+  - [x] Confirm `VideoNotFoundException` is thrown when `videoMapper.toSongDetail()` returns `null`
 
 ## Dev Notes
 
@@ -346,6 +346,30 @@ claude-sonnet-4-6 (bmad-create-story 2026-06-21)
 
 ### Debug Log References
 
+None.
+
 ### Completion Notes List
 
+- Task 1: `VideoService` created as `@Service`; constructor-injects `WebClient`, `VideoMapper`, `@Value("${youtube.api.key}")`. Builds `/videos` URI with `part=snippet,statistics,contentDetails`, `id`, `key`. `.onStatus(401)` → `UpstreamUnauthorizedException`. Mapper null-check → `VideoNotFoundException`. `WebClientRequestException` propagates naturally.
+- Task 2: `VideoServiceTest` with `@WireMockTest` — 3 tests: correct params + SongDetail (AC 1), 401 → `UpstreamUnauthorizedException` (AC 2), empty items[] → `VideoNotFoundException` (AC 4). All pass.
+- Task 3: `mvn test` — 25 tests run, 0 failures, 0 errors. No regressions.
+
 ### File List
+
+- `dest-spring-youtube-playlist-api/src/main/java/com/example/youtubeplaylistapi/service/VideoService.java` (NEW)
+- `dest-spring-youtube-playlist-api/src/test/java/com/example/youtubeplaylistapi/service/VideoServiceTest.java` (NEW)
+
+### Change Log
+
+- 2026-06-21: Story 3.2 complete — `VideoService` and `VideoServiceTest` implemented; 3 new WireMock tests pass; full suite 25/25 green.
+
+## Senior Developer Review (AI)
+
+**Review date:** 2026-06-21
+**Reviewer layers:** Blind Hunter, Edge Case Hunter, Acceptance Auditor
+**Scope:** Epic 3 (Stories 3.1–3.3) + Epic 5 (Stories 5.1–5.2)
+
+### Review Findings
+
+- [x] [Review][Defer] `.block()` called on potentially reactive thread [`VideoService.java:115`] — deferred, pre-existing pattern identical to `PlaylistService`; project uses synchronous WebClient throughout; no evidence of reactive dispatch in this application
+- [x] [Review][Defer] YouTube non-401 error statuses (403, 429, 500) not intercepted [`VideoService.java:112–113`] — deferred, consistent with PlaylistService pattern; GlobalExceptionHandler catches remaining WebClientResponseException as HTTP 500; expanding scope is out of story spec

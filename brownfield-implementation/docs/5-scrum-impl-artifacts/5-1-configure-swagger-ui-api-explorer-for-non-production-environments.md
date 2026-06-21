@@ -4,7 +4,7 @@ baseline_commit: b1318e8096366d5200c2744cb42f5ae8816d8e20
 
 # Story 5.1: Configure Swagger UI API Explorer for Non-Production Environments
 
-Status: review
+Status: done
 
 ## Story
 
@@ -159,3 +159,13 @@ claude-sonnet-4-6
 ## Change Log
 
 - 2026-06-21: Implemented Story 5.1 — added `springdoc:` config block to `application-local.yml` and `application-dev.yml` enabling Swagger UI and API docs for non-production profiles. Verified prod profile already disables springdoc. Verified `OpenApiConfig.java` unchanged. All 19 regression tests pass. BUILD SUCCESS.
+
+## Senior Developer Review (AI)
+
+**Review date:** 2026-06-21
+**Reviewer layers:** Blind Hunter, Edge Case Hunter, Acceptance Auditor (inline — 16-line YAML-only diff)
+**Outcome:** ✅ Clean — all ACs satisfied, no issues found
+
+### Review Findings
+
+*(none — clean review)*

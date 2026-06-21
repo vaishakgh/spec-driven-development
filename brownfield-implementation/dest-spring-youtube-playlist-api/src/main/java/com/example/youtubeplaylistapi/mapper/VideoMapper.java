@@ -15,6 +15,10 @@ public class VideoMapper {
 
         var item = ytResponse.getItems().get(0);
         var snippet = item.getSnippet();
+        // Guard: treat absent snippet as no usable video data → VideoService will throw VideoNotFoundException
+        if (snippet == null) {
+            return null;
+        }
 
         SongDetail detail = new SongDetail();
         detail.setVideoId(item.getId());                         // item-level id
@@ -22,9 +26,9 @@ public class VideoMapper {
         detail.setDescription(snippet.getDescription());
         detail.setChannelName(snippet.getChannelTitle());        // channelTitle → channelName
         detail.setPublishedAt(snippet.getPublishedAt());         // pass-through, no reformatting
-        detail.setDuration(item.getContentDetails().getDuration());
-        detail.setViewCount(item.getStatistics().getViewCount());
-        detail.setLikeCount(item.getStatistics().getLikeCount());
+        detail.setDuration(item.getContentDetails() != null ? item.getContentDetails().getDuration() : null);
+        detail.setViewCount(item.getStatistics() != null ? item.getStatistics().getViewCount() : null);
+        detail.setLikeCount(item.getStatistics() != null ? item.getStatistics().getLikeCount() : null);
 
         // high-quality thumbnail (nullable)
         String thumbnail = null;

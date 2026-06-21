@@ -4,7 +4,7 @@ baseline_commit: b1318e8096366d5200c2744cb42f5ae8816d8e20
 
 # Story 3.1: Implement SongDetail DTO and VideoMapper
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -28,53 +28,53 @@ so that the video endpoint returns correctly structured data with all required f
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Create `YTVideoDetailsResponse` upstream model (AC: 1–3)
-  - [ ] Create `src/main/java/com/example/youtubeplaylistapi/dto/youtube/YTVideoDetailsResponse.java`
-  - [ ] Annotate class and all static inner classes with `@JsonIgnoreProperties(ignoreUnknown = true)`
-  - [ ] Top-level field: `List<Item> items`
-  - [ ] Inner class `Item`: `String id`, `Snippet snippet`, `ContentDetails contentDetails`, `Statistics statistics`
-  - [ ] Inner class `Snippet`: `String publishedAt`, `String title`, `String description`, `String channelTitle`, `Thumbnails thumbnails`
-  - [ ] Inner class `Thumbnails`: only `Thumbnail high` (high-quality; ignore `default`, `medium`, `standard`, `maxres` via `@JsonIgnoreProperties`)
-  - [ ] Inner class `Thumbnail`: `String url`
-  - [ ] Inner class `ContentDetails`: `String duration`
-  - [ ] Inner class `Statistics`: `String viewCount`, `String likeCount`
-  - [ ] All fields use standard Java camelCase — matches YouTube API's camelCase JSON exactly; no `@JsonProperty` annotations needed
-  - [ ] `viewCount` and `likeCount` are `String` — YouTube API returns them as strings
+- [x] Task 1 — Create `YTVideoDetailsResponse` upstream model (AC: 1–3)
+  - [x] Create `src/main/java/com/example/youtubeplaylistapi/dto/youtube/YTVideoDetailsResponse.java`
+  - [x] Annotate class and all static inner classes with `@JsonIgnoreProperties(ignoreUnknown = true)`
+  - [x] Top-level field: `List<Item> items`
+  - [x] Inner class `Item`: `String id`, `Snippet snippet`, `ContentDetails contentDetails`, `Statistics statistics`
+  - [x] Inner class `Snippet`: `String publishedAt`, `String title`, `String description`, `String channelTitle`, `Thumbnails thumbnails`
+  - [x] Inner class `Thumbnails`: only `Thumbnail high` (high-quality; ignore `default`, `medium`, `standard`, `maxres` via `@JsonIgnoreProperties`)
+  - [x] Inner class `Thumbnail`: `String url`
+  - [x] Inner class `ContentDetails`: `String duration`
+  - [x] Inner class `Statistics`: `String viewCount`, `String likeCount`
+  - [x] All fields use standard Java camelCase — matches YouTube API's camelCase JSON exactly; no `@JsonProperty` annotations needed
+  - [x] `viewCount` and `likeCount` are `String` — YouTube API returns them as strings
 
-- [ ] Task 2 — Create `VideoMapper` (AC: 1–3)
-  - [ ] Create `src/main/java/com/example/youtubeplaylistapi/mapper/VideoMapper.java`
-  - [ ] Annotate with `@Component`
-  - [ ] Public method: `SongDetail toSongDetail(YTVideoDetailsResponse ytResponse)`
-  - [ ] Return `null` if `ytResponse == null || ytResponse.getItems() == null || ytResponse.getItems().isEmpty()`
-  - [ ] Get `item = ytResponse.getItems().get(0)`
-  - [ ] Map `item.getId()` → `videoId` (item-level id, NOT snippet.resourceId)
-  - [ ] Map `snippet.getTitle()` → `title`
-  - [ ] Map `snippet.getDescription()` → `description`
-  - [ ] Map `snippet.getChannelTitle()` → `channelName` (renamed field — critical mapping)
-  - [ ] Map `snippet.getPublishedAt()` → `publishedAt` (pass-through, no reformatting)
-  - [ ] Map `item.getContentDetails().getDuration()` → `duration`
-  - [ ] Map `item.getStatistics().getViewCount()` → `viewCount`
-  - [ ] Map `item.getStatistics().getLikeCount()` → `likeCount`
-  - [ ] `thumbnail`: set to `null` when `snippet.thumbnails` is null OR `snippet.thumbnails.high` is null; otherwise set to `high.url`
-  - [ ] `videoUrl`: always `"https://www.youtube.com/watch?v=" + item.getId()`
-  - [ ] Uses setters on `SongDetail` — NOT constructors (generated DTO has setters; constructor may change on regen)
-  - [ ] Imports `SongDetail` from `com.example.youtubeplaylistapi.dto` (generated package)
+- [x] Task 2 — Create `VideoMapper` (AC: 1–3)
+  - [x] Create `src/main/java/com/example/youtubeplaylistapi/mapper/VideoMapper.java`
+  - [x] Annotate with `@Component`
+  - [x] Public method: `SongDetail toSongDetail(YTVideoDetailsResponse ytResponse)`
+  - [x] Return `null` if `ytResponse == null || ytResponse.getItems() == null || ytResponse.getItems().isEmpty()`
+  - [x] Get `item = ytResponse.getItems().get(0)`
+  - [x] Map `item.getId()` → `videoId` (item-level id, NOT snippet.resourceId)
+  - [x] Map `snippet.getTitle()` → `title`
+  - [x] Map `snippet.getDescription()` → `description`
+  - [x] Map `snippet.getChannelTitle()` → `channelName` (renamed field — critical mapping)
+  - [x] Map `snippet.getPublishedAt()` → `publishedAt` (pass-through, no reformatting)
+  - [x] Map `item.getContentDetails().getDuration()` → `duration`
+  - [x] Map `item.getStatistics().getViewCount()` → `viewCount`
+  - [x] Map `item.getStatistics().getLikeCount()` → `likeCount`
+  - [x] `thumbnail`: set to `null` when `snippet.thumbnails` is null OR `snippet.thumbnails.high` is null; otherwise set to `high.url`
+  - [x] `videoUrl`: always `"https://www.youtube.com/watch?v=" + item.getId()`
+  - [x] Uses setters on `SongDetail` — NOT constructors (generated DTO has setters; constructor may change on regen)
+  - [x] Imports `SongDetail` from `com.example.youtubeplaylistapi.dto` (generated package)
 
-- [ ] Task 3 — Write unit tests (AC: 1–3)
-  - [ ] Create `src/test/java/com/example/youtubeplaylistapi/mapper/VideoMapperTest.java`
-  - [ ] Plain JUnit 5, no `@SpringBootTest` — instantiate `VideoMapper` directly: `new VideoMapper()`
-  - [ ] `should_map_all_fields_when_full_youtube_response()` — verifies AC 1: all `SongDetail` fields, especially `channelName` (not `channelTitle`)
-  - [ ] `should_return_null_thumbnail_when_high_thumbnail_missing()` — verifies AC 2
-  - [ ] `should_return_null_when_items_array_is_empty()` — verifies AC 3: mapper returns `null`
-  - [ ] Assert `videoId` comes from `item.id` (not from snippet)
-  - [ ] Assert `channelName` equals the `channelTitle` value from the raw YouTube response
-  - [ ] Assert `publishedAt` is passed through as-is (no reformatting)
-  - [ ] Run `mvn test` — all 3 new mapper tests pass
+- [x] Task 3 — Write unit tests (AC: 1–3)
+  - [x] Create `src/test/java/com/example/youtubeplaylistapi/mapper/VideoMapperTest.java`
+  - [x] Plain JUnit 5, no `@SpringBootTest` — instantiate `VideoMapper` directly: `new VideoMapper()`
+  - [x] `should_map_all_fields_when_full_youtube_response()` — verifies AC 1: all `SongDetail` fields, especially `channelName` (not `channelTitle`)
+  - [x] `should_return_null_thumbnail_when_high_thumbnail_missing()` — verifies AC 2
+  - [x] `should_return_null_when_items_array_is_empty()` — verifies AC 3: mapper returns `null`
+  - [x] Assert `videoId` comes from `item.id` (not from snippet)
+  - [x] Assert `channelName` equals the `channelTitle` value from the raw YouTube response
+  - [x] Assert `publishedAt` is passed through as-is (no reformatting)
+  - [x] Run `mvn test` — all 3 new mapper tests pass
 
-- [ ] Task 4 — Compile and verify (AC: all)
-  - [ ] Run `mvn generate-sources compile` — must succeed (generated `SongDetail` required in classpath)
-  - [ ] Run `mvn test` — all tests pass (existing tests + 3 new mapper tests)
-  - [ ] Confirm no hand-written `SongDetail.java` under `src/main/java/.../dto/` (only in `target/`)
+- [x] Task 4 — Compile and verify (AC: all)
+  - [x] Run `mvn generate-sources compile` — must succeed (generated `SongDetail` required in classpath)
+  - [x] Run `mvn test` — all tests pass (existing tests + 3 new mapper tests)
+  - [x] Confirm no hand-written `SongDetail.java` under `src/main/java/.../dto/` (only in `target/`)
 
 ## Dev Notes
 
@@ -436,6 +436,33 @@ claude-sonnet-4-6 (bmad-create-story 2026-06-21)
 
 ### Debug Log References
 
+None.
+
 ### Completion Notes List
 
+- Task 1: `YTVideoDetailsResponse` created with all nested static inner classes (`Item`, `Snippet`, `Thumbnails`, `Thumbnail`, `ContentDetails`, `Statistics`), all annotated `@JsonIgnoreProperties(ignoreUnknown = true)`, camelCase fields matching YouTube API JSON.
+- Task 2: `VideoMapper` created as `@Component`; maps `channelTitle` → `channelName` (critical rename), derives `videoId` from `item.id` (not snippet), sets `thumbnail` to `null` when `high` thumbnail absent, returns `null` for empty/null `items` list.
+- Task 3: `VideoMapperTest` — 3 plain JUnit 5 tests pass: full-mapping, null-thumbnail, empty-items-array.
+- Task 4: `mvn generate-sources compile` success; `mvn test` — 22 tests run, 0 failures; no hand-written `SongDetail.java` in `src/`.
+
 ### File List
+
+- `dest-spring-youtube-playlist-api/src/main/java/com/example/youtubeplaylistapi/dto/youtube/YTVideoDetailsResponse.java` (NEW)
+- `dest-spring-youtube-playlist-api/src/main/java/com/example/youtubeplaylistapi/mapper/VideoMapper.java` (NEW)
+- `dest-spring-youtube-playlist-api/src/test/java/com/example/youtubeplaylistapi/mapper/VideoMapperTest.java` (NEW)
+
+### Change Log
+
+- 2026-06-21: Story 3.1 complete — `YTVideoDetailsResponse`, `VideoMapper`, and `VideoMapperTest` implemented; all 3 mapper tests pass; full suite 22/22 green.
+
+## Senior Developer Review (AI)
+
+**Review date:** 2026-06-21
+**Reviewer layers:** Blind Hunter, Edge Case Hunter, Acceptance Auditor
+**Scope:** Epic 3 (Stories 3.1–3.3) + Epic 5 (Stories 5.1–5.2)
+
+### Review Findings
+
+- [x] [Review][Patch] NPE: null snippet in VideoMapper — `item.getSnippet()` returns null if YouTube omits the snippet object; all subsequent `snippet.getX()` calls (title, description, channelName, publishedAt, thumbnails) throw NullPointerException [`VideoMapper.java:228`]
+- [x] [Review][Patch] NPE: null contentDetails or null statistics in VideoMapper — `item.getContentDetails().getDuration()` and `item.getStatistics().getViewCount()` / `.getLikeCount()` NPE if YouTube omits these nested objects on a video item [`VideoMapper.java:236–238`]
+- [x] [Review][Defer] videoUrl built with potentially null item.getId() [`VideoMapper.java:247`] — deferred, pre-existing; YouTube API contract guarantees `id` on any returned item; outer empty-list guard handles absent videos
