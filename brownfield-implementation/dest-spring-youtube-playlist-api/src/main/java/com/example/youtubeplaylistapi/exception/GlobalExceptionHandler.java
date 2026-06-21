@@ -109,6 +109,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
+    // Story 2.3 handler — pageToken format validation failure
+
+    @ExceptionHandler(InvalidPageTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPageToken(
+            InvalidPageTokenException ex, HttpServletRequest request) {
+
+        log.warn("endpoint={} status={} error={}", request.getRequestURI(), 400,
+                 ex.getClass().getSimpleName());
+
+        ErrorResponse body = new ErrorResponse();
+        body.setError("Bad Request");
+        body.setMessage("Invalid or malformed pageToken.");
+        body.setCode(400);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(
             Exception ex, HttpServletRequest request) {

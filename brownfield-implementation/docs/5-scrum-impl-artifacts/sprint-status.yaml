@@ -36,7 +36,7 @@
 # - Recommended sprint order per architecture: Epic 1 → Epic 4 → Epics 2 & 3 (parallel) → Epic 5 → Epic 6 → Epic 7
 
 generated: 2026-06-20
-last_updated: 2026-06-21  # stories 4-1 and 4-2 → done
+last_updated: 2026-06-21  # stories 4-1 and 4-2 → done; stories 2-1, 2-2, 2-3 → done (code review complete, all patches applied); epic-3 → in-progress; stories 3-1, 3-2, 3-3 → ready-for-dev; epic-5 → in-progress; stories 5-1 and 5-2 → ready-for-dev; epic-6 → in-progress; stories 6-1, 6-2, 6-3 → ready-for-dev; epic-7 → in-progress; stories 7-1, 7-2, 7-3 → ready-for-dev
 project: brownfield-implementation
 project_key: NOKEY
 tracking_system: file-system
@@ -57,35 +57,35 @@ development_status:
   epic-4-retrospective: optional
 
   # ── Epic 2: Playlist Retrieval — End to End ────────────────────────────────
-  epic-2: in-progress
-  2-1-implement-playlist-response-dtos-and-mapper: ready-for-dev
-  2-2-implement-playlistservice-with-youtube-api-integration: backlog
-  2-3-implement-playlistcontroller-with-pagetoken-validation: backlog
+  epic-2: done
+  2-1-implement-playlist-response-dtos-and-mapper: done
+  2-2-implement-playlistservice-with-youtube-api-integration: done
+  2-3-implement-playlistcontroller-with-pagetoken-validation: done
   epic-2-retrospective: optional
 
   # ── Epic 3: Video Detail Retrieval — End to End ────────────────────────────
-  epic-3: backlog
-  3-1-implement-songdetail-dto-and-videomapper: backlog
-  3-2-implement-videoservice-with-youtube-api-integration: backlog
-  3-3-implement-videocontroller-with-404-handling-for-missing-videos: backlog
+  epic-3: in-progress
+  3-1-implement-songdetail-dto-and-videomapper: in-progress
+  3-2-implement-videoservice-with-youtube-api-integration: ready-for-dev
+  3-3-implement-videocontroller-with-404-handling-for-missing-videos: ready-for-dev
   epic-3-retrospective: optional
 
   # ── Epic 5: Observability & API Explorer ───────────────────────────────────
-  epic-5: backlog
-  5-1-configure-swagger-ui-api-explorer-for-non-production-environments: backlog
-  5-2-configure-kubernetes-health-probes-and-structured-json-logging: backlog
+  epic-5: in-progress
+  5-1-configure-swagger-ui-api-explorer-for-non-production-environments: review
+  5-2-configure-kubernetes-health-probes-and-structured-json-logging: in-progress
   epic-5-retrospective: optional
 
   # ── Epic 6: Test Suite & Quality Gate ─────────────────────────────────────
-  epic-6: backlog
-  6-1-set-up-junit-5-and-wiremock-test-infrastructure: backlog
-  6-2-port-playlist-munit-tests-to-junit-5-wiremock: backlog
-  6-3-port-video-munit-tests-and-add-404-body-validation-test: backlog
+  epic-6: in-progress
+  6-1-set-up-junit-5-and-wiremock-test-infrastructure: ready-for-dev
+  6-2-port-playlist-munit-tests-to-junit-5-wiremock: ready-for-dev
+  6-3-port-video-munit-tests-and-add-404-body-validation-test: ready-for-dev
   epic-6-retrospective: optional
 
   # ── Epic 7: Deployment, Shadow Mode & Cutover ─────────────────────────────
-  epic-7: backlog
-  7-1-create-dockerfile-and-kubernetes-manifests: backlog
-  7-2-implement-shadow-mode-request-replay-harness: backlog
-  7-3-execute-cutover-consumer-notification-and-cloudhub-decommission: backlog
+  epic-7: in-progress
+  7-1-create-dockerfile-and-kubernetes-manifests: ready-for-dev
+  7-2-implement-shadow-mode-request-replay-harness: ready-for-dev
+  7-3-execute-cutover-consumer-notification-and-cloudhub-decommission: ready-for-dev
   epic-7-retrospective: optional
