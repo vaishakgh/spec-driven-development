@@ -36,7 +36,7 @@
 # - Recommended sprint order per architecture: Epic 1 → Epic 4 → Epics 2 & 3 (parallel) → Epic 5 → Epic 6 → Epic 7
 
 generated: 2026-06-20
-last_updated: 2026-06-21
+last_updated: 2026-06-21  # stories 4-1 and 4-2 → done
 project: brownfield-implementation
 project_key: NOKEY
 tracking_system: file-system
@@ -51,14 +51,14 @@ development_status:
   epic-1-retrospective: optional
 
   # ── Epic 4: Error Handling (implement before Epics 2 & 3) ─────────────────
-  epic-4: backlog
-  4-1-implement-errorresponse-dto-and-globalexceptionhandler-for-request-level-errors: backlog
-  4-2-implement-upstream-and-unexpected-error-handling: backlog
+  epic-4: in-progress
+  4-1-implement-errorresponse-dto-and-globalexceptionhandler-for-request-level-errors: done
+  4-2-implement-upstream-and-unexpected-error-handling: done
   epic-4-retrospective: optional
 
   # ── Epic 2: Playlist Retrieval — End to End ────────────────────────────────
-  epic-2: backlog
-  2-1-implement-playlist-response-dtos-and-mapper: backlog
+  epic-2: in-progress
+  2-1-implement-playlist-response-dtos-and-mapper: ready-for-dev
   2-2-implement-playlistservice-with-youtube-api-integration: backlog
   2-3-implement-playlistcontroller-with-pagetoken-validation: backlog
   epic-2-retrospective: optional

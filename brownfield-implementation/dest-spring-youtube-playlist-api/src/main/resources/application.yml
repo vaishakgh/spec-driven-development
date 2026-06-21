@@ -7,6 +7,9 @@ spring:
   threads:
     virtual:
       enabled: true
+  web:
+    resources:
+      add-mappings: false
 
 management:
   endpoint:
