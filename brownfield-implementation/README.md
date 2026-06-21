@@ -58,7 +58,7 @@ Each row is one conversational context in Claude — one BMad persona session. "
 | 1 — Analysis | ✅ Complete | — |
 | 2 — Planning (PRD) | ✅ Complete | — |
 | 3 — Solutioning (Architecture + Epics) | ✅ Complete | Implementation Readiness: READY |
-| 4 — Implementation | 🔄 In Progress | Epics 1, 4, 2, 3, 5, 6 ✅ done · Epic 7 🔄 in review |
+| 4 — Implementation | ✅ Complete | All 7 Epics ✅ done |
 
 **Sprint status:** [`docs/5-scrum-impl-artifacts/sprint-status.yaml`](./docs/5-scrum-impl-artifacts/sprint-status.yaml)
 
@@ -70,7 +70,7 @@ Each row is one conversational context in Claude — one BMad persona session. "
 | Epic 3 — Video Detail Retrieval | 3 / 3 | ✅ Done |
 | Epic 5 — Observability & API Explorer | 2 / 2 | ✅ Done |
 | Epic 6 — Test Suite & Quality Gate | 3 / 3 | ✅ Done |
-| Epic 7 — Deployment, Shadow Mode & Cutover | 3 / 3 | 🔄 In Review |
+| Epic 7 — Deployment, Shadow Mode & Cutover | 3 / 3 | ✅ Done |
 
 **Master index for AI agent context:** [docs/index.md](./docs/index.md)
 
@@ -338,18 +338,21 @@ All six Epic 6 and Epic 7 stories implemented and code reviewed.
 - 1 minor cleanup applied: unused `WireMockRuntimeInfo wmInfo` parameter removed from `should_forward_page_token_to_upstream_youtube_call`
 - 9 items deferred to Epic 6 extension or future hardening stories
 
-**Story 7.1 — Create Dockerfile and Kubernetes Manifests** 🔄 `review`
+**Story 7.1 — Create Dockerfile and Kubernetes Manifests** ✅ `done`
 - Multi-stage `Dockerfile`: `eclipse-temurin:21-jdk-alpine` (build) → `eclipse-temurin:21-jre-alpine` (runtime)
 - `k8s/deployment.yaml`: 1 replica, NFR-4 resource limits (cpu 100m/250m, memory 256Mi/512Mi), `YOUTUBE_API_KEY` from `secretKeyRef`, liveness/readiness probes at Actuator health endpoints
 - `k8s/service.yaml`: ClusterIP on port 8081
 - `k8s/configmap.yaml`: non-sensitive config (`SPRING_PROFILES_ACTIVE`, base URL, max-results)
 
-**Story 7.2 — Implement Shadow Mode Request-Replay Harness** 🔄 `review`
+**Story 7.2 — Implement Shadow Mode Request-Replay Harness** ✅ `done`
 - `docs/7-production-ops/compare.py`: Python harness with 4 test scenarios, recursive field-level JSON diff, NFR-1 latency gate (Spring ≤ 120% of Mule), FR-7 known-difference handling, exit code 0/1 for CI
 - `docs/7-production-ops/README.md`: usage guide, known differences table, gate criteria
 
-**Story 7.3 — Execute Cutover, Consumer Notification, and CloudHub Decommission** 🔄 `review`
+**Story 7.3 — Execute Cutover, Consumer Notification, and CloudHub Decommission** ✅ `done`
 - `docs/7-production-ops/cutover-record.md`: complete ops runbook — pre-cutover gate checklist, FR-7 consumer notification template (3-working-day notice), traffic switch procedure, 48-hour stability observation, CloudHub decommission steps, rollback plan
+
+**Code Review — Epic 7** ✅ `done`
+- 12 patches applied: k8s ConfigMap injection fix, image tag pinning, JVM memory flags, probe timeouts, dev profile config, `compare.py` list diff handling, type-check guards, error handling, latency tracking, raw-body logging warning, cutover runbook fixes
 
 #### Artifacts · [`docs/5-scrum-impl-artifacts/`](./docs/5-scrum-impl-artifacts/) · [`docs/6-epic-dev-review/`](./docs/6-epic-dev-review/) · [`docs/7-production-ops/`](./docs/7-production-ops/)
 
@@ -378,10 +381,10 @@ All six Epic 6 and Epic 7 stories implemented and code reviewed.
 | [6-1-set-up-junit-5-and-wiremock-test-infrastructure.md](./docs/5-scrum-impl-artifacts/6-1-set-up-junit-5-and-wiremock-test-infrastructure.md) | Story 6.1 — done |
 | [6-2-port-playlist-munit-tests-to-junit-5-wiremock.md](./docs/5-scrum-impl-artifacts/6-2-port-playlist-munit-tests-to-junit-5-wiremock.md) | Story 6.2 — done |
 | [6-3-port-video-munit-tests-and-add-404-body-validation-test.md](./docs/5-scrum-impl-artifacts/6-3-port-video-munit-tests-and-add-404-body-validation-test.md) | Story 6.3 — done |
-| [7-1-create-dockerfile-and-kubernetes-manifests.md](./docs/5-scrum-impl-artifacts/7-1-create-dockerfile-and-kubernetes-manifests.md) | Story 7.1 — in review |
-| [7-2-implement-shadow-mode-request-replay-harness.md](./docs/5-scrum-impl-artifacts/7-2-implement-shadow-mode-request-replay-harness.md) | Story 7.2 — in review |
-| [7-3-execute-cutover-consumer-notification-and-cloudhub-decommission.md](./docs/5-scrum-impl-artifacts/7-3-execute-cutover-consumer-notification-and-cloudhub-decommission.md) | Story 7.3 — in review |
-| [deferred-work.md](./docs/6-epic-dev-review/deferred-work.md) | All deferred findings from Epic 1, 4, 2, 3, 5, and 6 code reviews |
+| [7-1-create-dockerfile-and-kubernetes-manifests.md](./docs/5-scrum-impl-artifacts/7-1-create-dockerfile-and-kubernetes-manifests.md) | Story 7.1 — done |
+| [7-2-implement-shadow-mode-request-replay-harness.md](./docs/5-scrum-impl-artifacts/7-2-implement-shadow-mode-request-replay-harness.md) | Story 7.2 — done |
+| [7-3-execute-cutover-consumer-notification-and-cloudhub-decommission.md](./docs/5-scrum-impl-artifacts/7-3-execute-cutover-consumer-notification-and-cloudhub-decommission.md) | Story 7.3 — done |
+| [deferred-work.md](./docs/6-epic-dev-review/deferred-work.md) | All deferred findings from Epic 1, 4, 2, 3, 5, 6, and 7 code reviews |
 | [compare.py](./docs/7-production-ops/compare.py) | Shadow mode request-replay harness (Python) |
 | [README.md](./docs/7-production-ops/README.md) | Shadow harness usage guide |
 | [cutover-record.md](./docs/7-production-ops/cutover-record.md) | Ops runbook — cutover checklist, notification template, rollback plan |
