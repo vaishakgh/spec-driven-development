@@ -1,0 +1,186 @@
+openapi: "3.1.0"
+
+info:
+  title: Balance Enquiry API
+  version: "1.0.0"
+  description: >
+    Read-only endpoint allowing an authenticated customer to query their own
+    payment account balance. Governed by the Balance Enquiry API Constitution v1.0.0.
+
+servers:
+  - url: /api
+    description: Service root
+
+paths:
+  /accounts/{accountId}/balance:
+    get:
+      summary: Get account balance
+      description: >
+        Returns the available balance for the specified account.
+        The authenticated customer's JWT subject claim must match the accountId.
+        Suspended accounts are rejected even when ownership is confirmed.
+      operationId: getAccountBalance
+      tags:
+        - Balance
+
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Unique identifier of the payment account.
+          schema:
+            type: string
+            maxLength: 64
+
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer JWT token. Must be valid and non-expired.
+          schema:
+            type: string
+            pattern: '^Bearer .+'
+
+      responses:
+        "200":
+          description: Balance retrieved successfully.
+          headers:
+            Cache-Control:
+              description: Always `no-store` — responses MUST NOT be cached.
+              schema:
+                type: string
+                enum:
+                  - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+              example:
+                accountId: "acc_1A2B3C"
+                availableBalance: 1024.50
+                currency: "GBP"
+                lastUpdatedAt: "2026-06-21T14:32:00Z"
+
+        "401":
+          description: >
+            Missing or invalid JWT token. The request was not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "UNAUTHORIZED"
+                message: "A valid Bearer token is required."
+
+        "403":
+          description: >
+            Access denied. Either the authenticated customer does not own the
+            requested account, or the account is suspended.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                ownership_mismatch:
+                  summary: JWT sub does not match accountId
+                  value:
+                    code: "FORBIDDEN"
+                    message: "You do not have access to this account."
+                account_suspended:
+                  summary: Account is suspended
+                  value:
+                    code: "ACCOUNT_SUSPENDED"
+                    message: "This account has been suspended. Contact support."
+
+        "404":
+          description: The specified accountId does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "NOT_FOUND"
+                message: "Account not found."
+
+        "429":
+          description: >
+            Rate limit exceeded. The authenticated user has sent more than
+            60 requests per minute.
+          headers:
+            Retry-After:
+              description: >
+                Number of seconds to wait before retrying. Always present on 429.
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "RATE_LIMIT_EXCEEDED"
+                message: "Too many requests. Please retry after 30 seconds."
+
+components:
+  schemas:
+    BalanceResponse:
+      type: object
+      required:
+        - accountId
+        - availableBalance
+        - currency
+        - lastUpdatedAt
+      additionalProperties: false
+      properties:
+        accountId:
+          type: string
+          description: The unique identifier of the account (matches path parameter).
+          example: "acc_1A2B3C"
+        availableBalance:
+          type: number
+          format: decimal
+          description: >
+            Spendable balance as stored in the database. Not a pending or
+            projected balance. Precision up to 4 decimal places.
+          example: 1024.50
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO 4217 currency code.
+          example: "GBP"
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: >
+            ISO 8601 timestamp of the last balance update. May be null for
+            accounts that have never been updated. The key is always present.
+          example: "2026-06-21T14:32:00Z"
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code.
+          example: "UNAUTHORIZED"
+        message:
+          type: string
+          description: Human-readable error description.
+          example: "A valid Bearer token is required."
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        JWT token issued by the existing authentication service.
+        The `sub` claim must equal the `accountId` path parameter.
+
+security:
+  - BearerAuth: []
