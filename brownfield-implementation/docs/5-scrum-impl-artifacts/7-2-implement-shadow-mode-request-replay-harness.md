@@ -4,7 +4,7 @@ baseline_commit: 9b9d277885d0e71d46de200e8839fa49a16c7ae8
 
 # Story 7.2: Implement Shadow Mode Request-Replay Harness
 
-Status: review
+Status: done
 
 ## Story
 
@@ -337,3 +337,13 @@ claude-sonnet-4-6
 
 - docs/7-production-ops/compare.py (new)
 - docs/7-production-ops/README.md (new)
+
+### Review Findings
+
+- [x] [Review][Patch] `deep_diff()` uses `zip()` on lists — silently truncates comparison at the shorter list; extra elements in either response are never inspected, masking regressions — violates AC-1 field-by-field completeness [compare.py:83-85]
+- [x] [Review][Patch] `type(mule) != type(spring)` identity check produces false positives for semantically equal JSON values of different Python numeric types (e.g. `int` vs `float`) [compare.py:65]
+- [x] [Review][Patch] `requests.exceptions.Timeout` / `ConnectionError` not caught in `call_endpoint`; harness crashes with traceback, CI sees exit code 1 but not the structured FAILED message [compare.py:97]
+- [x] [Review][Patch] `expect_status_mismatch: True` scenario still appends to `latency_results` before `continue`; a slow video-not-found response can trigger a spurious NFR-1 FAIL [compare.py:131-136]
+- [x] [Review][Patch] Both services returning non-JSON (e.g. proxy HTML error page) causes `deep_diff` on `_raw` string values; if both return identical error text the scenario reports PASS with no warning [compare.py:100-103]
+- [x] [Review][Defer] Placeholder IDs `PLtest12345` and `dQw4w9WgXcQ` in REQUEST_SCENARIOS; requires live services — acknowledged by dev agent, documented in README — deferred, pre-existing
+- [x] [Review][Defer] `IGNORED_FIELDS` set has no path-scoping — any key name added suppresses that key globally; empty set currently makes this moot — deferred, pre-existing

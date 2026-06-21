@@ -13,7 +13,7 @@ Usage:
 """
 
 import argparse
-import json
+import itertools
 import sys
 import time
 from typing import Any
@@ -55,6 +55,8 @@ REQUEST_SCENARIOS = [
 # Fields to EXCLUDE from comparison (known intentional differences)
 IGNORED_FIELDS: set[str] = set()
 
+_MISSING = object()  # sentinel for zip_longest — distinct from any JSON value
+
 
 # ── Core comparison logic ─────────────────────────────────────────────────────
 
@@ -62,11 +64,17 @@ def deep_diff(mule: Any, spring: Any, path: str = "$") -> list[dict]:
     """Recursively compare two JSON objects. Returns list of field-level diffs."""
     diffs = []
 
-    if type(mule) != type(spring):
+    mule_is_dict = isinstance(mule, dict)
+    mule_is_list = isinstance(mule, list)
+    spring_is_dict = isinstance(spring, dict)
+    spring_is_list = isinstance(spring, list)
+
+    # Structural type mismatch (one is a container, other is not, or container types differ)
+    if mule_is_dict != spring_is_dict or mule_is_list != spring_is_list:
         diffs.append({"path": path, "mule": mule, "spring": spring})
         return diffs
 
-    if isinstance(mule, dict):
+    if mule_is_dict:
         all_keys = set(mule.keys()) | set(spring.keys())
         for key in sorted(all_keys):
             if key in IGNORED_FIELDS:
@@ -78,11 +86,17 @@ def deep_diff(mule: Any, spring: Any, path: str = "$") -> list[dict]:
                 diffs.append({"path": child_path, "mule": mule[key], "spring": "(missing)"})
             else:
                 diffs.extend(deep_diff(mule[key], spring[key], child_path))
-    elif isinstance(mule, list):
+    elif mule_is_list:
         if len(mule) != len(spring):
             diffs.append({"path": f"{path}[length]", "mule": len(mule), "spring": len(spring)})
-        for i, (m, s) in enumerate(zip(mule, spring)):
-            diffs.extend(deep_diff(m, s, f"{path}[{i}]"))
+        for i, (m, s) in enumerate(itertools.zip_longest(mule, spring, fillvalue=_MISSING)):
+            child_path = f"{path}[{i}]"
+            if m is _MISSING:
+                diffs.append({"path": child_path, "mule": "(missing)", "spring": s})
+            elif s is _MISSING:
+                diffs.append({"path": child_path, "mule": m, "spring": "(missing)"})
+            else:
+                diffs.extend(deep_diff(m, s, child_path))
     else:
         if mule != spring:
             diffs.append({"path": path, "mule": mule, "spring": spring})
@@ -94,13 +108,23 @@ def call_endpoint(base_url: str, path: str, params: dict) -> tuple[int, Any, flo
     """Call an endpoint. Returns (status_code, response_body_as_dict, latency_ms)."""
     url = base_url.rstrip("/") + path
     t0 = time.perf_counter()
-    resp = requests.get(url, params=params, timeout=10)
+    try:
+        resp = requests.get(url, params=params, timeout=10)
+    except requests.exceptions.Timeout:
+        raise RuntimeError(f"TIMEOUT calling {url}")
+    except requests.exceptions.ConnectionError as exc:
+        raise RuntimeError(f"CONNECTION ERROR calling {url}: {exc}")
     latency_ms = (time.perf_counter() - t0) * 1000.0
     try:
         body = resp.json()
     except Exception:
         body = {"_raw": resp.text}
     return resp.status_code, body, latency_ms
+
+
+def _is_raw_body(body: Any) -> bool:
+    """Return True if body is a non-JSON fallback dict produced by call_endpoint."""
+    return isinstance(body, dict) and "_raw" in body and len(body) == 1
 
 
 # ── Runner ────────────────────────────────────────────────────────────────────
@@ -125,15 +149,23 @@ def run(mule_base: str, spring_base: str) -> bool:
         print(f"▶  {name}")
         print(f"   GET {path} params={params or '(none)'}")
 
-        mule_status, mule_body, mule_latency = call_endpoint(mule_base, path, params)
-        spring_status, spring_body, spring_latency = call_endpoint(spring_base, path, params)
+        try:
+            mule_status, mule_body, mule_latency = call_endpoint(mule_base, path, params)
+            spring_status, spring_body, spring_latency = call_endpoint(spring_base, path, params)
+        except RuntimeError as exc:
+            print(f"   ✗ ENDPOINT ERROR: {exc}")
+            all_pass = False
+            print()
+            continue
 
-        latency_results.append({
-            "scenario": name,
-            "mule_ms": round(mule_latency, 1),
-            "spring_ms": round(spring_latency, 1),
-            "ratio": round(spring_latency / mule_latency, 2) if mule_latency > 0 else None,
-        })
+        # Only track latency for scenarios that are not declared known mismatches
+        if not expect_status_mismatch:
+            latency_results.append({
+                "scenario": name,
+                "mule_ms": round(mule_latency, 1),
+                "spring_ms": round(spring_latency, 1),
+                "ratio": round(spring_latency / mule_latency, 2) if mule_latency > 0 else None,
+            })
 
         # Status check
         if mule_status != spring_status:
@@ -144,6 +176,10 @@ def run(mule_base: str, spring_base: str) -> bool:
                 all_pass = False
             print()
             continue
+
+        # Warn if neither side returned valid JSON
+        if _is_raw_body(mule_body) and _is_raw_body(spring_body):
+            print(f"   ⚠ WARNING: both responses are non-JSON — comparing raw text, not structured fields")
 
         # Field-level comparison (only when status matches)
         diffs = deep_diff(mule_body, spring_body)

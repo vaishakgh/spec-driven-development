@@ -4,7 +4,7 @@ baseline_commit: 9b9d277885d0e71d46de200e8839fa49a16c7ae8
 
 # Story 7.1: Create Dockerfile and Kubernetes Manifests
 
-Status: review
+Status: done
 
 ## Story
 
@@ -286,3 +286,16 @@ claude-sonnet-4-6
 - k8s/deployment.yaml (new)
 - k8s/service.yaml (new)
 - k8s/configmap.yaml (new)
+
+### Review Findings
+
+- [x] [Review][Patch] ConfigMap keys `YOUTUBE_API_BASE_URL` and `YOUTUBE_API_MAX_RESULTS` defined in configmap.yaml but never injected as env vars in deployment.yaml — AC-4 requires env-specific config to reach the container [k8s/deployment.yaml:22-32, k8s/configmap.yaml:6-8]
+- [x] [Review][Patch] `image: youtube-playlist-api:latest` — no registry prefix and no `imagePullPolicy`; will cause `ErrImagePull` on any real cluster [k8s/deployment.yaml:19]
+- [x] [Review][Patch] Dockerfile ENTRYPOINT lacks JVM memory tuning flags; with 512Mi container limit JVM will exceed cgroup limit and OOMKill — add `-XX:MaxRAMPercentage=75.0` [Dockerfile:15]
+- [x] [Review][Patch] Probe `timeoutSeconds` not set (defaults to 1s); JVM GC pause will flip probes and cause unnecessary pod restarts [k8s/deployment.yaml:40-53]
+- [x] [Review][Patch] `SPRING_PROFILES_ACTIVE: "dev"` hardcoded in ConfigMap — activates dev profile in any cluster, enabling Swagger UI and API docs publicly in production [k8s/configmap.yaml:6]
+- [x] [Review][Defer] No Kubernetes namespace in manifests — resources land in `default`; namespace is deployment-environment convention [k8s/deployment.yaml, service.yaml, configmap.yaml] — deferred, pre-existing
+- [x] [Review][Defer] Single replica with no PodDisruptionBudget — rolling updates cause ~15s downtime window; within spec range (1-2 replicas allowed) — deferred, pre-existing
+- [x] [Review][Defer] No pod/container securityContext — no `runAsNonRoot`, `readOnlyRootFilesystem`, etc.; infrastructure hardening outside Epic 7 scope — deferred, pre-existing
+- [x] [Review][Defer] Memory limit 512Mi mandated by NFR-4 from architecture docs; JVM tuning via MaxRAMPercentage (P3 above) mitigates OOMKill risk — deferred, pre-existing
+- [x] [Review][Defer] `COPY --from=builder /app/target/*.jar app.jar` glob; Spring Boot defaults produce a single fat JAR, low risk — deferred, pre-existing

@@ -4,7 +4,7 @@ baseline_commit: 9b9d277885d0e71d46de200e8839fa49a16c7ae8
 
 # Story 7.3: Execute Cutover, Consumer Notification, and CloudHub Decommission
 
-Status: review
+Status: done
 
 ## Story
 
@@ -198,3 +198,8 @@ claude-sonnet-4-6
 ### File List
 
 - docs/7-production-ops/cutover-record.md (new)
+
+### Review Findings
+
+- [x] [Review][Patch] `cutover-record.md` "Post-Migration Final State" states "All 8 integration tests: PASSING" — incorrect count; no story spec specifies 8 tests; should read "All integration tests: PASSING" [cutover-record.md:138]
+- [x] [Review][Patch] `cutover-record.md` Pre-Cutover Gate Checklist has no step for creating the `youtube-playlist-api-secret` K8s Secret — mandatory prerequisite before deployment; add `kubectl create secret generic youtube-playlist-api-secret --from-literal=YOUTUBE_API_KEY=<key>` [cutover-record.md:9-18]

@@ -16,7 +16,10 @@ spec:
     spec:
       containers:
         - name: youtube-playlist-api
+          # Replace with your registry and a versioned tag before deploying, e.g.:
+          # <REGISTRY>/youtube-playlist-api:<VERSION>
           image: youtube-playlist-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
           env:
@@ -30,6 +33,16 @@ spec:
                 secretKeyRef:
                   name: youtube-playlist-api-secret
                   key: YOUTUBE_API_KEY
+            - name: YOUTUBE_API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: youtube-playlist-api-config
+                  key: YOUTUBE_API_BASE_URL
+            - name: YOUTUBE_API_MAX_RESULTS
+              valueFrom:
+                configMapKeyRef:
+                  name: youtube-playlist-api-config
+                  key: YOUTUBE_API_MAX_RESULTS
           resources:
             requests:
               cpu: "100m"
@@ -44,6 +57,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 3
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -51,3 +65,4 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 5
             failureThreshold: 3
+            timeoutSeconds: 5

@@ -12,6 +12,7 @@ Complete all gates before sending consumer notification.
 
 | Gate | Command | Expected | Status |
 |------|---------|----------|--------|
+| K8s Secret created | `kubectl create secret generic youtube-playlist-api-secret --from-literal=YOUTUBE_API_KEY=<actual-key>` | secret created | [ ] PENDING |
 | Tests green | `./mvnw test` | BUILD SUCCESS, Failures: 0 | [ ] PENDING |
 | Shadow mode PASSED | `python3 docs/7-production-ops/compare.py --mule <url> --spring <url>` | "SHADOW MODE GATE: PASSED" | [ ] PENDING |
 | Liveness probe UP | `curl http://<k8s>/actuator/health/liveness` | `{"status":"UP"}` | [ ] PENDING |
@@ -134,7 +135,7 @@ Execute only after observation period clears with no incidents.
 ✓ GET /actuator/health/readiness → { "status": "UP" }
 ✓ Mule CloudHub worker: STOPPED
 ✓ Anypoint subscription: CANCELLED
-✓ All 8 integration tests: PASSING
+✓ All integration tests: PASSING
 ✓ Shadow mode gate: PASSED (on record)
 ✓ Consumer team notified of FR-7 breaking change
 ✓ CloudHub cost: ELIMINATED

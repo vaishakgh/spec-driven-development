@@ -36,7 +36,7 @@
 # - Recommended sprint order per architecture: Epic 1 → Epic 4 → Epics 2 & 3 (parallel) → Epic 5 → Epic 6 → Epic 7
 
 generated: 2026-06-20
-last_updated: 2026-06-21  # epic-1 → done; epic-4 → done; epic-5 → done; epic-6 → done (code review: 2 patches applied — @AutoConfigureWebTestClient + remove unused wmInfo param)
+last_updated: 2026-06-21  # epic-1 → done; epic-4 → done; epic-5 → done; epic-6 → done (code review: 2 patches applied — @AutoConfigureWebTestClient + remove unused wmInfo param); epic-7 → done (code review: 12 patches applied — k8s ConfigMap injection, image tag, JVM memory flags, probe timeouts, dev profile, compare.py list diff, type check, error handling, latency tracking, raw-body warning, cutover runbook fixes)
 project: brownfield-implementation
 project_key: NOKEY
 tracking_system: file-system
@@ -84,8 +84,8 @@ development_status:
   epic-6-retrospective: optional
 
   # ── Epic 7: Deployment, Shadow Mode & Cutover ─────────────────────────────
-  epic-7: in-progress
-  7-1-create-dockerfile-and-kubernetes-manifests: review
-  7-2-implement-shadow-mode-request-replay-harness: review
-  7-3-execute-cutover-consumer-notification-and-cloudhub-decommission: review
+  epic-7: done
+  7-1-create-dockerfile-and-kubernetes-manifests: done
+  7-2-implement-shadow-mode-request-replay-harness: done
+  7-3-execute-cutover-consumer-notification-and-cloudhub-decommission: done
   epic-7-retrospective: optional
