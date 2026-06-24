@@ -35,6 +35,83 @@ planning, task generation, and implementation, with a human in the loop at every
 
 ---
 
+## Speckit Stage Flow
+
+The diagram below shows how the human operator and the five Speckit stages are sequenced to produce the final service. Each stage gates the next — no stage starts without the prior stage's artifacts being complete and validated.
+
+```mermaid
+sequenceDiagram
+    actor Human as Human
+    participant Const as Speckit<br/>Constitution
+    participant Spec as Speckit<br/>Specify
+    participant Plan as Speckit<br/>Plan
+    participant Tasks as Speckit<br/>Tasks
+    participant Impl as Speckit<br/>Implement
+    participant Docs as Docs / Artifacts
+    participant Code as Codebase
+
+    rect rgb(220, 235, 255)
+        Note over Human,Docs: Stage 1 — Constitution
+
+        Human->>Const: /speckit-constitution
+        Const->>Docs: constitution.md v1.0.0<br/>(5 principles · 2 governance sections)
+        Const-->>Human: Gate: Constitution ratified
+    end
+
+    rect rgb(255, 240, 220)
+        Note over Human,Docs: Stage 2 — Specification
+
+        Human->>Spec: /speckit-specify
+        Spec->>Docs: spec.md<br/>(1 user story · 6 scenarios · 11 FRs · 6 success criteria · 4 edge cases)
+        Spec->>Docs: checklists/requirements.md — all 16 items pass
+        Spec-->>Human: Gate: Spec quality checklist 16/16
+    end
+
+    rect rgb(230, 255, 225)
+        Note over Human,Docs: Stage 3 — Planning
+
+        Human->>Plan: /speckit-plan
+        Note over Plan: Phase 0 — Research
+        Plan->>Docs: research.md<br/>(FastAPI · asyncpg · PyJWT · slowapi · pytest)
+        Note over Plan: Phase 1 — Design
+        Plan->>Docs: data-model.md — accounts schema · BalanceResponse model
+        Plan->>Docs: contracts/balance-enquiry.yaml — OpenAPI 3.1 · 5 status codes
+        Plan->>Docs: quickstart.md — 7 validation scenarios · load test
+        Plan->>Docs: plan.md — constitution check 5/5 principles passed
+        Plan-->>Human: Gate: Constitution check 5/5
+    end
+
+    rect rgb(255, 245, 220)
+        Note over Human,Docs: Stage 4 — Tasks
+
+        Human->>Tasks: /speckit-tasks
+        Tasks->>Docs: tasks.md — 23 tasks across 4 phases<br/>(T001–T004 setup · T005–T011 foundational · T012–T016 US1 · T017–T023 polish)
+        Tasks-->>Human: Gate: Tasks dependency-ordered and parallelism-annotated
+    end
+
+    rect rgb(250, 225, 255)
+        Note over Human,Code: Stage 5 — Implementation
+
+        Human->>Impl: /speckit-implement
+        Note over Impl: Phase 1 — Setup (T001–T004)
+        Impl->>Code: pyproject.toml · requirements.txt · .env.example · directory structure
+
+        Note over Impl: Phase 2 — Foundational (T005–T011)
+        Impl->>Code: config.py · database.py · exceptions.py<br/>jwt_handler.py · rate_limiter.py · main.py
+
+        Note over Impl: Phase 3 — User Story 1 (T012–T016)
+        Impl->>Code: account.py · account_repository.py<br/>balance_service.py · balance.py route · router wiring
+
+        Note over Impl: Phase 4 — Polish (T017–T023)
+        Impl->>Code: conftest.py · seed.sql · unit tests (5)<br/>contract tests (6) · integration tests (6) · Dockerfile
+
+        Impl->>Docs: Constitution compliance verified — 0 violations
+        Impl-->>Human: Gate: All 23 tasks complete · 17 tests passing
+    end
+```
+
+---
+
 ## Session Log
 
 ---

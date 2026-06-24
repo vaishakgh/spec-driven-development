@@ -51,6 +51,99 @@ Each row is one conversational context in Claude — one BMad persona session. "
 
 ---
 
+## Persona Session Flow
+
+The diagram below shows how the human operator, the four BMad personas, and the output artifacts are sequenced across all 13 sessions. Every phase transition is initiated by the human — personas do not invoke each other. Artifacts from each phase gate the next.
+
+```mermaid
+sequenceDiagram
+    actor Human as Human
+    participant Mary as Mary<br/>Business Analyst
+    participant John as John<br/>Product Manager
+    participant Winston as Winston<br/>Architect
+    participant Amelia as Amelia<br/>Senior Developer
+    participant Docs as Docs / Artifacts
+    participant Code as Codebase
+
+    rect rgb(220, 235, 255)
+        Note over Human,Docs: Phase 1 — Analysis
+
+        Human->>Mary: /bmad-technical-research  [Session 1]
+        Mary->>Docs: 14-section feasibility report<br/>(stack · TCO · migration strategy · effort range)
+
+        Human->>Mary: /bmad-document-project  [Session 2]
+        Mary->>Docs: Project inventory + re-analysis<br/>(all generic findings overridden by project facts)
+
+        Mary-->>Human: Gate: Analysis complete
+    end
+
+    rect rgb(255, 240, 220)
+        Note over Human,Docs: Phase 2 — Planning
+
+        Human->>John: /bmad-prd  [Session 3]
+        John->>Docs: PRD — 22 FRs · 5 NFRs<br/>(FR-7 breaking change · pageToken · shadow mode gate)
+
+        Human->>John: /bmad-create-epics-and-stories  [Session 4]
+        John->>Docs: 7 Epics · 19 Stories
+
+        John-->>Human: Gate: Planning complete
+    end
+
+    rect rgb(230, 255, 225)
+        Note over Human,Docs: Phase 3 — Solutioning
+
+        Human->>Winston: /bmad-check-implementation-readiness  [Session 5]
+        Winston->>Docs: IR report — 22/22 FRs · 5/5 NFRs · 0 blockers
+
+        Human->>Winston: /bmad-create-architecture  [Session 6]
+        Winston->>Docs: Architecture doc — 6 sections · 16/16 checklist passed<br/>(Spring Boot 4.1.0 · WebClient · GlobalExceptionHandler · OAS 3.0)
+
+        Winston-->>Human: Gate: READY FOR IMPLEMENTATION
+    end
+
+    rect rgb(250, 225, 255)
+        Note over Human,Code: Phase 4 — Implementation
+
+        Human->>Amelia: /bmad-sprint-planning  [Session 7]
+        Amelia->>Docs: sprint-status.yaml — 7 epics · 19 stories initialised
+
+        Human->>Amelia: /bmad-dev-story Epic 1  [Session 8]
+        Amelia->>Code: Spring Boot scaffold · OAS 3.0 spec · profiles · API key injection
+        Human->>Amelia: /bmad-code-review Epic 1
+        Amelia->>Docs: 2 patches applied · 7 items deferred
+
+        Human->>Amelia: /bmad-dev-story Epic 4  [Session 9]
+        Amelia->>Code: ErrorResponse DTO · GlobalExceptionHandler<br/>(replaces 11 Mule error scopes)
+        Human->>Amelia: /bmad-code-review Epic 4
+        Amelia->>Docs: 5 items deferred to Epic 6/7
+
+        Human->>Amelia: /bmad-dev-story Epic 2  [Session 10]
+        Amelia->>Code: PlaylistMapper · PlaylistService · PlaylistController<br/>(pageToken validation · YouTube API integration)
+        Human->>Amelia: /bmad-code-review Epic 2
+        Human->>Amelia: /bmad-create-story Epics 3,5,6,7
+        Amelia->>Docs: 12 story files created · sprint-status updated
+
+        Human->>Amelia: /bmad-dev-story Epic 3  [Session 11]
+        Amelia->>Code: VideoMapper · VideoService · VideoController<br/>(FR-7: 404 for missing video — breaks Mule 200-with-nulls)
+        Human->>Amelia: /bmad-code-review Epic 3
+        Amelia->>Docs: Null guards patched · 7 items deferred
+
+        Human->>Amelia: /bmad-dev-story Epic 5  [Session 12]
+        Amelia->>Code: Swagger UI (local/dev only) · K8s health probes · structured JSON logging
+        Human->>Amelia: /bmad-code-review Epic 5
+        Amelia->>Docs: Clean review — no patches required
+
+        Human->>Amelia: /bmad-dev-story Epics 6+7  [Session 13]
+        Amelia->>Code: JUnit 5 + WireMock tests (8 methods)<br/>Dockerfile · K8s manifests · shadow harness · cutover runbook
+        Human->>Amelia: /bmad-code-review Epics 6+7
+        Amelia->>Docs: 12 patches applied
+
+        Amelia-->>Human: Gate: All 7 Epics complete
+    end
+```
+
+---
+
 ## Project Status
 
 | Phase | Status | Gate |
