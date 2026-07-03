@@ -31,28 +31,28 @@ The migration is executed using the **BMad spec-driven development method** — 
 > ### 22–43 real-world days → ~6.5 hours with AI personas
 > 13 sessions · 4 phases · 4 personas · 19 stories implemented
 
-Each row is one conversational context in Claude — one BMad persona session. <span style="color:#d97706">**Real-World Est.**</span> is the estimated effort for a senior engineer working without AI assistance. <span style="color:#16a34a">**With Personas**</span> is the approximate elapsed time per session.
+Each row is one conversational context in Claude — one BMad persona session. ![Real-World Est.](https://img.shields.io/badge/Real--World_Est.-d97706?style=flat) is the estimated effort for a senior engineer working without AI assistance. ![With Personas](https://img.shields.io/badge/With_Personas-16a34a?style=flat) is the approximate elapsed time per session.
 
-| # | Session | Persona | Scope | <span style="color:#d97706">Real-World Est.</span> | <span style="color:#16a34a">With Personas</span> |
+| # | Session | Persona | Scope | ![Real-World Est.](https://img.shields.io/badge/Real--World_Est.-d97706?style=flat) | ![With Personas](https://img.shields.io/badge/With_Personas-16a34a?style=flat) |
 |---|---|---|---|---|---|
 | **Phase 1 — Analysis** | | | | | |
-| 1 | Technical Research | Mary | 14-section MuleSoft migration feasibility report | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~20 min</span> |
-| 2 | Project Re-Analysis | Mary | Source project scan; all generic findings overridden by project facts | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~15 min</span> |
+| 1 | Technical Research | Mary | 14-section MuleSoft migration feasibility report | ![3–5 days](https://img.shields.io/badge/3%E2%80%935_days-d97706?style=flat) | ![~20 min](https://img.shields.io/badge/~20_min-16a34a?style=flat) |
+| 2 | Project Re-Analysis | Mary | Source project scan; all generic findings overridden by project facts | ![1–2 days](https://img.shields.io/badge/1%E2%80%932_days-d97706?style=flat) | ![~15 min](https://img.shields.io/badge/~15_min-16a34a?style=flat) |
 | **Phase 2 — Planning** | | | | | |
-| 3 | PRD | John | 22 FRs, 5 NFRs, 3 key behavioural decisions | <span style="color:#d97706">2–3 days</span> | <span style="color:#16a34a">~25 min</span> |
-| 4 | Epics & Stories | John | 7 Epics, 19 Stories defined | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~20 min</span> |
+| 3 | PRD | John | 22 FRs, 5 NFRs, 3 key behavioural decisions | ![2–3 days](https://img.shields.io/badge/2%E2%80%933_days-d97706?style=flat) | ![~25 min](https://img.shields.io/badge/~25_min-16a34a?style=flat) |
+| 4 | Epics & Stories | John | 7 Epics, 19 Stories defined | ![1–2 days](https://img.shields.io/badge/1%E2%80%932_days-d97706?style=flat) | ![~20 min](https://img.shields.io/badge/~20_min-16a34a?style=flat) |
 | **Phase 3 — Solutioning** | | | | | |
-| 5 | Implementation Readiness | Winston | 22/22 FRs covered, 5/5 NFRs, 0 blocking issues | <span style="color:#d97706">0.5 day</span> | <span style="color:#16a34a">~10 min</span> |
-| 6 | Architecture | Winston | 6-section architecture doc, 16/16 checklist passed | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~30 min</span> |
+| 5 | Implementation Readiness | Winston | 22/22 FRs covered, 5/5 NFRs, 0 blocking issues | ![0.5 day](https://img.shields.io/badge/0.5_day-d97706?style=flat) | ![~10 min](https://img.shields.io/badge/~10_min-16a34a?style=flat) |
+| 6 | Architecture | Winston | 6-section architecture doc, 16/16 checklist passed | ![3–5 days](https://img.shields.io/badge/3%E2%80%935_days-d97706?style=flat) | ![~30 min](https://img.shields.io/badge/~30_min-16a34a?style=flat) |
 | **Phase 4 — Implementation** | | | | | |
-| 7 | Sprint Planning | Amelia | Sprint tracker initialised for all 7 epics, 19 stories | <span style="color:#d97706">0.5 day</span> | <span style="color:#16a34a">~10 min</span> |
-| 8 | Epic 1 — Foundation | Amelia | 3 stories implemented + code review | <span style="color:#d97706">2–4 days</span> | <span style="color:#16a34a">~45 min</span> |
-| 9 | Epic 4 — Error Handling | Amelia | 2 stories implemented + code review | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~30 min</span> |
-| 10 | Epic 2 — Playlist Retrieval | Amelia | 3 stories implemented + code review + story creation for Epics 3–7 | <span style="color:#d97706">2–4 days</span> | <span style="color:#16a34a">~45 min</span> |
-| 11 | Epic 3 — Video Retrieval | Amelia | 3 stories implemented + code review | <span style="color:#d97706">2–4 days</span> | <span style="color:#16a34a">~40 min</span> |
-| 12 | Epic 5 — Observability | Amelia | 2 stories implemented + code review | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~25 min</span> |
-| 13 | Epics 6 & 7 — Test Suite, Deployment & Cutover | Amelia | 6 stories implemented + code review; shadow harness; Dockerfile; K8s manifests; cutover runbook | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~60 min</span> |
-| | | | **Total (13 sessions)** | <span style="color:#d97706">**22–43 days**</span> | <span style="color:#16a34a">**~6.5 hours**</span> |
+| 7 | Sprint Planning | Amelia | Sprint tracker initialised for all 7 epics, 19 stories | ![0.5 day](https://img.shields.io/badge/0.5_day-d97706?style=flat) | ![~10 min](https://img.shields.io/badge/~10_min-16a34a?style=flat) |
+| 8 | Epic 1 — Foundation | Amelia | 3 stories implemented + code review | ![2–4 days](https://img.shields.io/badge/2%E2%80%934_days-d97706?style=flat) | ![~45 min](https://img.shields.io/badge/~45_min-16a34a?style=flat) |
+| 9 | Epic 4 — Error Handling | Amelia | 2 stories implemented + code review | ![1–2 days](https://img.shields.io/badge/1%E2%80%932_days-d97706?style=flat) | ![~30 min](https://img.shields.io/badge/~30_min-16a34a?style=flat) |
+| 10 | Epic 2 — Playlist Retrieval | Amelia | 3 stories implemented + code review + story creation for Epics 3–7 | ![2–4 days](https://img.shields.io/badge/2%E2%80%934_days-d97706?style=flat) | ![~45 min](https://img.shields.io/badge/~45_min-16a34a?style=flat) |
+| 11 | Epic 3 — Video Retrieval | Amelia | 3 stories implemented + code review | ![2–4 days](https://img.shields.io/badge/2%E2%80%934_days-d97706?style=flat) | ![~40 min](https://img.shields.io/badge/~40_min-16a34a?style=flat) |
+| 12 | Epic 5 — Observability | Amelia | 2 stories implemented + code review | ![1–2 days](https://img.shields.io/badge/1%E2%80%932_days-d97706?style=flat) | ![~25 min](https://img.shields.io/badge/~25_min-16a34a?style=flat) |
+| 13 | Epics 6 & 7 — Test Suite, Deployment & Cutover | Amelia | 6 stories implemented + code review; shadow harness; Dockerfile; K8s manifests; cutover runbook | ![3–5 days](https://img.shields.io/badge/3%E2%80%935_days-d97706?style=flat) | ![~60 min](https://img.shields.io/badge/~60_min-16a34a?style=flat) |
+| | | | **Total (13 sessions)** | ![22–43 days](https://img.shields.io/badge/22%E2%80%9343_days-d97706?style=flat) | ![~6.5 hours](https://img.shields.io/badge/~6.5_hours-16a34a?style=flat) |
 
 > Real-world estimates assume a solo senior engineer including requirements, design, implementation, and review cycles. With-personas times are approximate — each session covers story creation, implementation, and code review within a single conversational context.
 

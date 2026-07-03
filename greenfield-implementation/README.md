@@ -40,16 +40,16 @@ planning, task generation, and implementation, with a human in the loop at every
 > ### 7–12 real-world days → ~100 min with Speckit
 > 5 stages · 1 endpoint · 23 tasks · 17 tests · 0 constitution violations
 
-Each row is one Speckit stage run as a single conversational context. <span style="color:#d97706">**Real-World Est.**</span> is the estimated effort for a senior engineer working without AI assistance. <span style="color:#16a34a">**With Speckit**</span> is the approximate elapsed time per stage.
+Each row is one Speckit stage run as a single conversational context. ![Real-World Est.](https://img.shields.io/badge/Real--World_Est.-d97706?style=flat) is the estimated effort for a senior engineer working without AI assistance. ![With Speckit](https://img.shields.io/badge/With_Speckit-16a34a?style=flat) is the approximate elapsed time per stage.
 
-| # | Stage | Command | Scope | <span style="color:#d97706">Real-World Est.</span> | <span style="color:#16a34a">With Speckit</span> |
+| # | Stage | Command | Scope | ![Real-World Est.](https://img.shields.io/badge/Real--World_Est.-d97706?style=flat) | ![With Speckit](https://img.shields.io/badge/With_Speckit-16a34a?style=flat) |
 |---|---|---|---|---|---|
-| 1 | Constitution | `/speckit-constitution` | 5 principles · 2 governance sections ratified at v1.0.0 | <span style="color:#d97706">0.5–1 day</span> | <span style="color:#16a34a">~10 min</span> |
-| 2 | Specification | `/speckit-specify` | 1 user story · 6 scenarios · 11 FRs · 6 SCs · 4 edge cases · 16/16 checklist | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~15 min</span> |
-| 3 | Planning | `/speckit-plan` | Tech stack selection · data model · OpenAPI 3.1 contract · quickstart · constitution check 5/5 | <span style="color:#d97706">2–3 days</span> | <span style="color:#16a34a">~20 min</span> |
-| 4 | Tasks | `/speckit-tasks` | 23 dependency-ordered tasks across 4 phases with parallelism annotations | <span style="color:#d97706">0.5–1 day</span> | <span style="color:#16a34a">~10 min</span> |
-| 5 | Implementation | `/speckit-implement` | 11 Python modules · 17 tests (unit / contract / integration) · Dockerfile · 0 constitution violations | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~45 min</span> |
-| | | | **Total (5 stages)** | <span style="color:#d97706">**7–12 days**</span> | <span style="color:#16a34a">**~100 min (~1.7 hours)**</span> |
+| 1 | Constitution | `/speckit-constitution` | 5 principles · 2 governance sections ratified at v1.0.0 | ![0.5–1 day](https://img.shields.io/badge/0.5%E2%80%931_day-d97706?style=flat) | ![~10 min](https://img.shields.io/badge/~10_min-16a34a?style=flat) |
+| 2 | Specification | `/speckit-specify` | 1 user story · 6 scenarios · 11 FRs · 6 SCs · 4 edge cases · 16/16 checklist | ![1–2 days](https://img.shields.io/badge/1%E2%80%932_days-d97706?style=flat) | ![~15 min](https://img.shields.io/badge/~15_min-16a34a?style=flat) |
+| 3 | Planning | `/speckit-plan` | Tech stack selection · data model · OpenAPI 3.1 contract · quickstart · constitution check 5/5 | ![2–3 days](https://img.shields.io/badge/2%E2%80%933_days-d97706?style=flat) | ![~20 min](https://img.shields.io/badge/~20_min-16a34a?style=flat) |
+| 4 | Tasks | `/speckit-tasks` | 23 dependency-ordered tasks across 4 phases with parallelism annotations | ![0.5–1 day](https://img.shields.io/badge/0.5%E2%80%931_day-d97706?style=flat) | ![~10 min](https://img.shields.io/badge/~10_min-16a34a?style=flat) |
+| 5 | Implementation | `/speckit-implement` | 11 Python modules · 17 tests (unit / contract / integration) · Dockerfile · 0 constitution violations | ![3–5 days](https://img.shields.io/badge/3%E2%80%935_days-d97706?style=flat) | ![~45 min](https://img.shields.io/badge/~45_min-16a34a?style=flat) |
+| | | | **Total (5 stages)** | ![7–12 days](https://img.shields.io/badge/7%E2%80%9312_days-d97706?style=flat) | ![~100 min (~1.7 hours)](https://img.shields.io/badge/~100_min_%28~1.7_hrs%29-16a34a?style=flat) |
 
 > Real-world estimates assume a solo senior engineer including governance, specification, design, implementation, and review cycles. With-Speckit times are approximate — each stage runs as a single conversational context.
 
