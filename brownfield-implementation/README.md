@@ -1,6 +1,6 @@
 # Brownfield Implementation — YouTube Playlist API Migration
 
-## What This Project Is
+## 1. What This Project Is
 
 This workspace documents and executes a **brownfield MuleSoft → Spring Boot migration** of an internal YouTube Playlist API service.
 
@@ -12,7 +12,7 @@ The migration is executed using the **BMad spec-driven development method** — 
 
 ---
 
-## Migration: Source → Destination
+## 2. Migration: Source → Destination
 
 | | Source | | Destination |
 |---|---|---|---|
@@ -26,36 +26,44 @@ The migration is executed using the **BMad spec-driven development method** — 
 
 ---
 
-## Time Comparison: Real-World vs. AI-Assisted
+## 3. Time Comparison: Real-World vs. AI-Assisted
 
-Each row is one conversational context in Claude — one BMad persona session. "Real-World Est." is the estimated effort for a senior engineer working without AI assistance. "With Personas" is the approximate elapsed time per session.
+> ### 22–43 real-world days → ~6.5 hours with AI personas
+> 13 sessions · 4 phases · 4 personas · 19 stories implemented
 
-| # | Session | Persona | Scope | Real-World Est. | With Personas |
+Each row is one conversational context in Claude — one BMad persona session. <span style="color:#d97706">**Real-World Est.**</span> is the estimated effort for a senior engineer working without AI assistance. <span style="color:#16a34a">**With Personas**</span> is the approximate elapsed time per session.
+
+| # | Session | Persona | Scope | <span style="color:#d97706">Real-World Est.</span> | <span style="color:#16a34a">With Personas</span> |
 |---|---|---|---|---|---|
-| 1 | Technical Research | Mary | 14-section MuleSoft migration feasibility report | 3–5 days | ~20 min |
-| 2 | Project Re-Analysis | Mary | Source project scan; all generic findings overridden by project facts | 1–2 days | ~15 min |
-| 3 | PRD | John | 22 FRs, 5 NFRs, 3 key behavioural decisions | 2–3 days | ~25 min |
-| 4 | Epics & Stories | John | 7 Epics, 19 Stories defined | 1–2 days | ~20 min |
-| 5 | Implementation Readiness | Winston | 22/22 FRs covered, 5/5 NFRs, 0 blocking issues | 0.5 day | ~10 min |
-| 6 | Architecture | Winston | 6-section architecture doc, 16/16 checklist passed | 3–5 days | ~30 min |
-| 7 | Sprint Planning | Amelia | Sprint tracker initialised for all 7 epics, 19 stories | 0.5 day | ~10 min |
-| 8 | Epic 1 — Foundation | Amelia | 3 stories implemented + code review | 2–4 days | ~45 min |
-| 9 | Epic 4 — Error Handling | Amelia | 2 stories implemented + code review | 1–2 days | ~30 min |
-| 10 | Epic 2 — Playlist Retrieval | Amelia | 3 stories implemented + code review + story creation for Epics 3–7 | 2–4 days | ~45 min |
-| 11 | Epic 3 — Video Retrieval | Amelia | 3 stories implemented + code review | 2–4 days | ~40 min |
-| 12 | Epic 5 — Observability | Amelia | 2 stories implemented + code review | 1–2 days | ~25 min |
-| 13 | Epics 6 & 7 — Test Suite, Deployment & Cutover | Amelia | 6 stories implemented + code review; shadow harness; Dockerfile; K8s manifests; cutover runbook | 3–5 days | ~60 min |
-| | | | **Total (13 sessions)** | **22–43 days** | **~6.5 hours** |
+| **Phase 1 — Analysis** | | | | | |
+| 1 | Technical Research | Mary | 14-section MuleSoft migration feasibility report | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~20 min</span> |
+| 2 | Project Re-Analysis | Mary | Source project scan; all generic findings overridden by project facts | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~15 min</span> |
+| **Phase 2 — Planning** | | | | | |
+| 3 | PRD | John | 22 FRs, 5 NFRs, 3 key behavioural decisions | <span style="color:#d97706">2–3 days</span> | <span style="color:#16a34a">~25 min</span> |
+| 4 | Epics & Stories | John | 7 Epics, 19 Stories defined | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~20 min</span> |
+| **Phase 3 — Solutioning** | | | | | |
+| 5 | Implementation Readiness | Winston | 22/22 FRs covered, 5/5 NFRs, 0 blocking issues | <span style="color:#d97706">0.5 day</span> | <span style="color:#16a34a">~10 min</span> |
+| 6 | Architecture | Winston | 6-section architecture doc, 16/16 checklist passed | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~30 min</span> |
+| **Phase 4 — Implementation** | | | | | |
+| 7 | Sprint Planning | Amelia | Sprint tracker initialised for all 7 epics, 19 stories | <span style="color:#d97706">0.5 day</span> | <span style="color:#16a34a">~10 min</span> |
+| 8 | Epic 1 — Foundation | Amelia | 3 stories implemented + code review | <span style="color:#d97706">2–4 days</span> | <span style="color:#16a34a">~45 min</span> |
+| 9 | Epic 4 — Error Handling | Amelia | 2 stories implemented + code review | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~30 min</span> |
+| 10 | Epic 2 — Playlist Retrieval | Amelia | 3 stories implemented + code review + story creation for Epics 3–7 | <span style="color:#d97706">2–4 days</span> | <span style="color:#16a34a">~45 min</span> |
+| 11 | Epic 3 — Video Retrieval | Amelia | 3 stories implemented + code review | <span style="color:#d97706">2–4 days</span> | <span style="color:#16a34a">~40 min</span> |
+| 12 | Epic 5 — Observability | Amelia | 2 stories implemented + code review | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~25 min</span> |
+| 13 | Epics 6 & 7 — Test Suite, Deployment & Cutover | Amelia | 6 stories implemented + code review; shadow harness; Dockerfile; K8s manifests; cutover runbook | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~60 min</span> |
+| | | | **Total (13 sessions)** | <span style="color:#d97706">**22–43 days**</span> | <span style="color:#16a34a">**~6.5 hours**</span> |
 
 > Real-world estimates assume a solo senior engineer including requirements, design, implementation, and review cycles. With-personas times are approximate — each session covers story creation, implementation, and code review within a single conversational context.
 
 ---
 
-## Persona Session Flow
+## 4. Persona Session Flow
 
 The diagram below shows how the human operator, the four BMad personas, and the output artifacts are sequenced across all 13 sessions. Every phase transition is initiated by the human — personas do not invoke each other. Artifacts from each phase gate the next.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111111', 'primaryColor': '#e8e8e8', 'primaryBorderColor': '#555555', 'lineColor': '#999999', 'secondaryColor': '#f0f0f0', 'tertiaryColor': '#ffffff', 'noteTextColor': '#111111', 'noteBkgColor': '#f5f5f5', 'noteBorderColor': '#888888', 'messageTextColor': '#111111', 'actorTextColor': '#111111', 'labelTextColor': '#111111', 'signalColor': '#999999', 'loopTextColor': '#111111', 'textColor': '#111111'}}}%%
 sequenceDiagram
     actor Human as Human
     participant Mary as Mary<br/>Business Analyst
@@ -144,7 +152,7 @@ sequenceDiagram
 
 ---
 
-## Project Status
+## 5. Project Status
 
 | Phase | Status | Gate |
 |---|---|---|
@@ -169,7 +177,7 @@ sequenceDiagram
 
 ---
 
-## Session Log
+## 6. Session Log
 
 ---
 

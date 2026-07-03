@@ -1,6 +1,6 @@
 # Greenfield Implementation — Balance Enquiry API
 
-## What This Project Is
+## 1. What This Project Is
 
 This workspace documents and executes a **greenfield Python REST API** for payment account
 balance enquiry.
@@ -21,7 +21,7 @@ planning, task generation, and implementation, with a human in the loop at every
 
 ---
 
-## Project Status
+## 2. Project Status
 
 | Stage | Command | Status |
 |-------|---------|--------|
@@ -35,11 +35,32 @@ planning, task generation, and implementation, with a human in the loop at every
 
 ---
 
-## Speckit Stage Flow
+## 3. Time Comparison: Real-World vs. AI-Assisted
+
+> ### 7–12 real-world days → ~100 min with Speckit
+> 5 stages · 1 endpoint · 23 tasks · 17 tests · 0 constitution violations
+
+Each row is one Speckit stage run as a single conversational context. <span style="color:#d97706">**Real-World Est.**</span> is the estimated effort for a senior engineer working without AI assistance. <span style="color:#16a34a">**With Speckit**</span> is the approximate elapsed time per stage.
+
+| # | Stage | Command | Scope | <span style="color:#d97706">Real-World Est.</span> | <span style="color:#16a34a">With Speckit</span> |
+|---|---|---|---|---|---|
+| 1 | Constitution | `/speckit-constitution` | 5 principles · 2 governance sections ratified at v1.0.0 | <span style="color:#d97706">0.5–1 day</span> | <span style="color:#16a34a">~10 min</span> |
+| 2 | Specification | `/speckit-specify` | 1 user story · 6 scenarios · 11 FRs · 6 SCs · 4 edge cases · 16/16 checklist | <span style="color:#d97706">1–2 days</span> | <span style="color:#16a34a">~15 min</span> |
+| 3 | Planning | `/speckit-plan` | Tech stack selection · data model · OpenAPI 3.1 contract · quickstart · constitution check 5/5 | <span style="color:#d97706">2–3 days</span> | <span style="color:#16a34a">~20 min</span> |
+| 4 | Tasks | `/speckit-tasks` | 23 dependency-ordered tasks across 4 phases with parallelism annotations | <span style="color:#d97706">0.5–1 day</span> | <span style="color:#16a34a">~10 min</span> |
+| 5 | Implementation | `/speckit-implement` | 11 Python modules · 17 tests (unit / contract / integration) · Dockerfile · 0 constitution violations | <span style="color:#d97706">3–5 days</span> | <span style="color:#16a34a">~45 min</span> |
+| | | | **Total (5 stages)** | <span style="color:#d97706">**7–12 days**</span> | <span style="color:#16a34a">**~100 min (~1.7 hours)**</span> |
+
+> Real-world estimates assume a solo senior engineer including governance, specification, design, implementation, and review cycles. With-Speckit times are approximate — each stage runs as a single conversational context.
+
+---
+
+## 4. Speckit Stage Flow
 
 The diagram below shows how the human operator and the five Speckit stages are sequenced to produce the final service. Each stage gates the next — no stage starts without the prior stage's artifacts being complete and validated.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryTextColor': '#111111', 'primaryColor': '#e8e8e8', 'primaryBorderColor': '#555555', 'lineColor': '#999999', 'secondaryColor': '#f0f0f0', 'tertiaryColor': '#ffffff', 'noteTextColor': '#111111', 'noteBkgColor': '#f5f5f5', 'noteBorderColor': '#888888', 'messageTextColor': '#111111', 'actorTextColor': '#111111', 'labelTextColor': '#111111', 'signalColor': '#999999', 'loopTextColor': '#111111', 'textColor': '#111111'}}}%%
 sequenceDiagram
     actor Human as Human
     participant Const as Speckit<br/>Constitution
@@ -112,7 +133,7 @@ sequenceDiagram
 
 ---
 
-## Session Log
+## 5. Session Log
 
 ---
 
