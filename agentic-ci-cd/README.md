@@ -6,7 +6,7 @@
 
 ## 1. What This Project Is
 
-This project wires **Harness CI/CD** into the spec-driven development method as a fully autonomous delivery layer. Rather than using Harness as a conventional pipeline runner, the goal is to exploit its native **agentic AI** features — DevOps Agent, Worker Agents, Error Analyzer, and Site Reliability Agent — so that the pipeline itself can reason, self-correct, and address issues without human intervention at every step.
+This project wires **CI/CD** into the spec-driven development method as a fully autonomous delivery layer. Rather than using Harness as a conventional pipeline runner, the goal is to exploit its native **agentic AI** features — DevOps Agent, Worker Agents, Error Analyzer, and Site Reliability Agent — so that the pipeline itself can reason, self-correct, and address issues without human intervention at every step.
 
 The end state is a delivery loop where a merged spec or story triggers a pipeline that plans, builds, tests, validates, and — if it fails — diagnoses and fixes the failure autonomously, looping back until the gate is passed or a human escalation is required.
 
@@ -149,9 +149,4 @@ sequenceDiagram
 
 ---
 
-## 6. References
 
-- [Harness DevOps Agent — Developer Hub](https://developer.harness.io/docs/platform/harness-ai/devops-agent/)
-- [Harness Worker Agents — Developer Hub](https://developer.harness.io/docs/platform/harness-ai/harness-agents/)
-- [Harness AI October 2025 Updates](https://www.harness.io/blog/harness-ai-october-2025-updates)
-- [Harness deploys AI agents across software delivery — SiliconANGLE](https://siliconangle.com/2025/08/26/harness-deploys-ai-agents-automate-every-aspect-software-delivery-code-generation/)
